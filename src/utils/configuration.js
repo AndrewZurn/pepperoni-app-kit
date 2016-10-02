@@ -1,6 +1,31 @@
 import {Map} from 'immutable';
+import * as env from '../../env';
 
-let configuration = Map();
+let baseConfig = {
+  USERS_PATH: '/users',
+  EXERCISES_PATH: '/exercises',
+  WORKOUTS_PATH: '/workouts'
+};
+
+let localConfig = Map({
+  ...baseConfig,
+  API_FAILED_REQUEST_WARNING_MESSAGE: false,
+  API_ROOT: 'http://localhost:8080'
+});
+
+let devConfig = Map({
+  ...baseConfig,
+  API_FAILED_REQUEST_WARNING_MESSAGE: false,
+  API_ROOT: 'http://spac-fusion-api.us-west-2.elasticbeanstalk.com'
+});
+
+let prodConfig = Map({
+  ...baseConfig,
+  API_FAILED_REQUEST_WARNING_MESSAGE: true,
+  API_ROOT: 'http://spac-fusion-api.us-west-2.elasticbeanstalk.com'
+});
+
+let configuration = getConfig();
 
 export function setConfiguration(name, value) {
   configuration = configuration.set(name, value);
@@ -20,4 +45,12 @@ export function getConfiguration(key) {
   }
 
   return configuration.get(key);
+}
+
+function getConfig() {
+  if (__DEV__) {
+    return localConfig;
+  } else {
+    return prodConfig;
+  }
 }

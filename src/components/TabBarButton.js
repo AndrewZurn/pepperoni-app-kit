@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   StyleSheet
 } from 'react-native';
+import Colors from '../utils/colors';
 
 export default React.createClass({
   displayName: 'TabBarButton',
@@ -14,23 +15,26 @@ export default React.createClass({
   },
   render() {
     return (
-      <TouchableOpacity
-        onPress={this.props.action}
-        style={[styles.button, this.props.isSelected && styles.selected]}
-        >
-        <Text>{this.props.text}</Text>
+      <TouchableOpacity onPress={this.props.action}
+                        style={[styles.button, this.props.isSelected && styles.selected]}>
+        <Text style={styles.buttonText}>{this.props.text}</Text>
       </TouchableOpacity>
     );
   }
 });
 
 const styles = StyleSheet.create({
+  buttonText: {
+    color: Colors.spacCream,
+    fontFamily: Colors.textStyle
+  },
   button: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    backgroundColor: Colors.spacGray
   },
   selected: {
-    backgroundColor: 'yellow'
+    backgroundColor: Colors.spacGold
   }
 });

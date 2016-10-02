@@ -3,7 +3,8 @@ import {
   NavigationExperimental,
   View,
   Platform,
-  StyleSheet
+  StyleSheet,
+  StatusBar
 } from 'react-native';
 const {
   CardStack: NavigationCardStack,
@@ -12,6 +13,7 @@ const {
 } = NavigationExperimental;
 import AppRouter from '../AppRouter';
 import TabBar from '../../components/TabBar';
+import Colors from '../../utils/colors';
 
 // Height duplicated from React Native NavigationHeader component
 const APP_BAR_HEIGHT = Platform.OS === 'ios' ? 64 : 56;
@@ -36,10 +38,11 @@ const NavigationView = React.createClass({
     return (
       <NavigationHeader
         {...sceneProps}
+        style={{backgroundColor: Colors.spacGray}}
         onNavigateBack={this.props.onNavigateBack}
         renderTitleComponent={() => {
           return (
-            <NavigationHeader.Title>
+            <NavigationHeader.Title textStyle={styles.titleText}>
               {sceneProps.scene.route.title}
             </NavigationHeader.Title>
           );
@@ -69,6 +72,7 @@ const NavigationView = React.createClass({
           renderHeader={this.renderHeader}
           renderScene={this.renderScene}
         />
+        <StatusBar barStyle='light-content'/>
         <TabBar
           height={TAB_BAR_HEIGHT}
           tabs={tabs}
@@ -86,8 +90,15 @@ const styles = StyleSheet.create({
   },
   sceneContainer: {
     flex: 1,
-    // marginTop: APP_BAR_HEIGHT,
+    marginTop: -APP_BAR_HEIGHT,
     marginBottom: TAB_BAR_HEIGHT
+  },
+  titleText: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: '500',
+    color: Colors.spacCream,
+    textAlign: Platform.OS === 'ios' ? 'center' : 'left'
   }
 });
 

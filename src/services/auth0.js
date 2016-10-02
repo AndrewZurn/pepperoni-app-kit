@@ -3,6 +3,7 @@ import Auth0Lock from 'react-native-lock';
 import * as AuthStateActions from '../modules/auth/AuthState';
 import store from '../redux/store';
 const {Platform} = require('react-native');
+import Colors from '../utils/colors';
 
 const clientId = env.AUTH0_CLIENT_ID;
 const domain = env.AUTH0_DOMAIN;
@@ -24,23 +25,24 @@ export function showLogin() {
   }
 
   const options = {
-    closable: true
+    closable: __DEV__,
   };
 
   if (Platform.OS === 'ios') {
     lock.customizeTheme({
-      A0ThemePrimaryButtonNormalColor: '#39babd',
-      A0ThemePrimaryButtonHighlightedColor: '#08AFB3',
-      A0ThemeSecondaryButtonTextColor: '#ffffff',
-      A0ThemeTextFieldTextColor: '#ffffff',
-      A0ThemeTextFieldPlaceholderTextColor: '#ffffff',
-      A0ThemeTextFieldIconColor: '#ffffff',
-      A0ThemeTitleTextColor: '#ffffff',
-      A0ThemeDescriptionTextColor: '#ffffff',
-      A0ThemeSeparatorTextColor: '#ffffff',
-      A0ThemeScreenBackgroundColor: '#39babd',
-      A0ThemeIconImageName: 'pepperoni',
-      A0ThemeCredentialBoxBorderColor: '' //transparent
+      A0ThemePrimaryButtonNormalColor: Colors.spacLightGray,
+      A0ThemePrimaryButtonHighlightedColor: Colors.spacGold,
+      A0ThemeSecondaryButtonTextColor: Colors.spacTan,
+      A0ThemeTextFieldTextColor: Colors.spacTan,
+      A0ThemeTextFieldPlaceholderTextColor: Colors.spacTan,
+      A0ThemeTextFieldIconColor: Colors.spacTan,
+      A0ThemeTitleTextColor: Colors.spacGold,
+      A0ThemeDescriptionTextColor: Colors.spacTan,
+      A0ThemeSeparatorTextColor: Colors.spacLightGray,
+      A0ThemeScreenBackgroundColor: '#000000',
+      A0ThemeIconImageName: 'spac_logo',
+      A0ThemeIconBackgroundColor: '#ffffff',
+      A0ThemeCredentialBoxBorderColor: ''
     });
   }
 

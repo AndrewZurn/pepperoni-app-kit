@@ -2,10 +2,17 @@ import Promise from 'bluebird';
 import HttpError from 'standard-http-error';
 import {getConfiguration} from '../utils/configuration';
 import {getAuthenticationToken} from '../utils/authentication';
-
-const EventEmitter = require('event-emitter');
+import EventEmitter from 'event-emitter';
 
 const TIMEOUT = 6000;
+
+export function xhrSentTopic(path) {
+  return 'XHR-SENT-' + path;
+}
+
+export function xhrFinishedTopic(path) {
+  return 'XHR-FINISHED-' + path;
+}
 
 /**
  * All HTTP errors are emitted on this channel for interested listeners
@@ -13,13 +20,18 @@ const TIMEOUT = 6000;
 export const errors = new EventEmitter();
 
 /**
+ * All HTTP XHR calls events will be emited on this channel for interested listeners
+ */
+export const xhrRequests = new EventEmitter();
+
+/**
  * GET a path relative to API root url.
  * @param {String}  path Relative path to the configured API endpoint
  * @param {Boolean} suppressRedBox If true, no warning is shown on failed request
- * @returns {Promise} of response body
+ * @returns {Promise} of response
  */
 export async function get(path, suppressRedBox) {
-  return bodyOf(request('get', path, null, suppressRedBox));
+  return request('get', path, null, suppressRedBox);
 }
 
 /**
@@ -27,10 +39,10 @@ export async function get(path, suppressRedBox) {
  * @param {String} path Relative path to the configured API endpoint
  * @param {Object} body Anything that you can pass to JSON.stringify
  * @param {Boolean} suppressRedBox If true, no warning is shown on failed request
- * @returns {Promise}  of response body
+ * @returns {Promise}  of response
  */
 export async function post(path, body, suppressRedBox) {
-  return bodyOf(request('post', path, body, suppressRedBox));
+  return request('post', path, body, suppressRedBox);
 }
 
 /**
@@ -38,20 +50,20 @@ export async function post(path, body, suppressRedBox) {
  * @param {String} path Relative path to the configured API endpoint
  * @param {Object} body Anything that you can pass to JSON.stringify
  * @param {Boolean} suppressRedBox If true, no warning is shown on failed request
- * @returns {Promise}  of response body
+ * @returns {Promise}  of response
  */
 export async function put(path, body, suppressRedBox) {
-  return bodyOf(request('put', path, body, suppressRedBox));
+  return request('put', path, body, suppressRedBox);
 }
 
 /**
  * DELETE a path relative to API root url
  * @param {String} path Relative path to the configured API endpoint
  * @param {Boolean} suppressRedBox If true, no warning is shown on failed request
- * @returns {Promise}  of response body
+ * @returns {Promise}  of response
  */
 export async function del(path, suppressRedBox) {
-  return bodyOf(request('delete', path, null, suppressRedBox));
+  return request('delete', path, null, suppressRedBox);
 }
 
 /**
@@ -59,15 +71,12 @@ export async function del(path, suppressRedBox) {
  * @param {String} method One of: get|post|put|delete
  * @param {String} path Relative path to the configured API endpoint
  * @param {Object} body Anything that you can pass to JSON.stringify
- * @param {Boolean} suppressRedBox If true, no warning is shown on failed request
+ * @param {Boolean} suppressRedBox If true, no warning/error box is shown on failed request
  */
 export async function request(method, path, body, suppressRedBox) {
   try {
     const response = await sendRequest(method, path, body, suppressRedBox);
-    return handleResponse(
-      path,
-      response
-    );
+    return handleResponse(path, response, method);
   }
   catch (error) {
     if (!suppressRedBox) {
@@ -83,65 +92,71 @@ export async function request(method, path, body, suppressRedBox) {
 export function url(path) {
   const apiRoot = getConfiguration('API_ROOT');
   return path.indexOf('/') === 0
-    ? apiRoot + path
-    : apiRoot + '/' + path;
+      ? apiRoot + path
+      : apiRoot + '/' + path;
 }
 
 /**
  * Constructs and fires a HTTP request
  */
 async function sendRequest(method, path, body) {
-
-  try {
-    const endpoint = url(path);
-    const token = await getAuthenticationToken();
-    const headers = getRequestHeaders(body, token);
-    const options = body
+  console.log(`Requesting ${method} - ${path}`);
+  const endpoint = url(path);
+  const token = await getAuthenticationToken();
+  const headers = getRequestHeaders(body, token);
+  const options = body
       ? {method, headers, body: JSON.stringify(body)}
       : {method, headers};
 
-    return timeout(fetch(endpoint, options), TIMEOUT);
-  } catch (e) {
-    throw new Error(e);
-  }
+  xhrRequests.emit(xhrSentTopic(path), {path, method, body});
+
+  return timeout(fetch(endpoint, options), TIMEOUT);
 }
 
 /**
  * Receives and reads a HTTP response
  */
-async function handleResponse(path, response) {
-  try {
-    const status = response.status;
+async function handleResponse(path, response, method) {
+  console.log(`Response ${response.status} - ${path}`);
+  const status = response.status;
 
-    // `fetch` promises resolve even if HTTP status indicates failure. Reroute
-    // promise flow control to interpret error responses as failures
-    if (status >= 400) {
-      const message = await getErrorMessageSafely(response);
-      const error = new HttpError(status, message);
+  // `fetch` promises resolve even if HTTP status indicates failure. Reroute
+  // promise flow control to interpret error responses as failures
+  if (status >= 400) {
+    const message = await getErrorMessageSafely(response);
+    const error = new HttpError(status, message);
 
-      // emit events on error channel, one for status-specific errors and other for all errors
-      errors.emit(status.toString(), {path, message: error.message});
-      errors.emit('*', {path, message: error.message}, status);
+    // emit events on error channel, one for status-specific errors and other for all errors
+    const errorEventBody = {path, status, message: error.message};
+    errors.emit(status.toString(), errorEventBody);
+    errors.emit('*', errorEventBody, status);
+    xhrRequests.emit(xhrFinishedTopic(path), errorEventBody);
 
-      throw error;
-    }
+    console.warn(`Request ${method} ${url(path)} - Status: ${status} - Error: ${JSON.stringify(errorEventBody)}`);
 
-    // parse response text
-    const responseBody = await response.text();
-    return {
-      status: response.status,
-      headers: response.headers,
-      body: responseBody ? JSON.parse(responseBody) : null
-    };
-  } catch (e) {
-    throw e;
+    return errorEventBody;
   }
+
+  // parse response text
+  const responseBody = await response.text();
+  const result = {
+    status: response.status,
+    headers: response.headers,
+    body: responseBody ? JSON.parse(responseBody) : null
+  };
+
+  xhrRequests.emit(xhrFinishedTopic(path), {path, status: result.status, body: result.body});
+
+  return result;
 }
 
 function getRequestHeaders(body, token) {
   const headers = body
-    ? {'Accept': 'application/json', 'Content-Type': 'application/json'}
-    : {'Accept': 'application/json'};
+      ? {'Accept': 'application/json',
+         'Content-Type': 'application/json',
+         'Origin': 'https://fusion-mobile.spac.com/',
+         'X-Requested-With': 'fusion-mobile'
+        } : {'Accept': 'application/json'};
 
   if (token) {
     return {...headers, Authorization: token};
@@ -181,21 +196,12 @@ function timeout(promise, ms) {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error('timeout')), ms);
     promise
-      .then(response => {
-        clearTimeout(timer);
-        resolve(response);
-      })
-      .catch(reject);
+        .then(response => {
+          clearTimeout(timer);
+          resolve(response);
+        })
+        .catch(reject);
   });
-}
-
-async function bodyOf(requestPromise) {
-  try {
-    const response = await requestPromise;
-    return response.body;
-  } catch (e) {
-    throw e;
-  }
 }
 
 /**

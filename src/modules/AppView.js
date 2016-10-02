@@ -1,6 +1,7 @@
 import React, {PropTypes} from 'react';
 import {View, StyleSheet, ActivityIndicator} from 'react-native';
 import NavigationViewContainer from './navigation/NavigationViewContainer';
+import AppRouter from './AppRouter';
 import * as auth0 from '../services/auth0';
 import * as snapshotUtil from '../utils/snapshot';
 import * as SessionStateActions from '../modules/session/SessionState';
@@ -18,11 +19,15 @@ const AppView = React.createClass({
       .then(snapshot => {
         const {dispatch} = this.props;
 
-        if (snapshot) {
-          dispatch(SessionStateActions.resetSessionStateFromSnapshot(snapshot));
-        } else {
-          dispatch(SessionStateActions.initializeSessionState());
-        }
+        // TODO: Removed for the time being as to not cause hickups during initial release
+        // Should fix in the future to allow saving of state between app sessions.
+        // if (snapshot) {
+        //   dispatch(SessionStateActions.resetSessionStateFromSnapshot(snapshot));
+        // } else {
+        //   dispatch(SessionStateActions.initializeSessionState());
+        // }
+
+        dispatch(SessionStateActions.initializeSessionState());
 
         store.subscribe(() => {
           snapshotUtil.saveSnapshot(store.getState());
@@ -49,7 +54,7 @@ const AppView = React.createClass({
 
     return (
       <View style={{flex: 1}}>
-        <NavigationViewContainer />
+        <NavigationViewContainer router={AppRouter} />
         {__DEV__ && <DeveloperMenu />}
       </View>
     );
