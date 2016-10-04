@@ -9,18 +9,21 @@ const clientId = env.AUTH0_CLIENT_ID;
 const domain = env.AUTH0_DOMAIN;
 const authenticationEnabled = clientId && domain;
 
-let lock = null;
-if (authenticationEnabled) {
-  lock = new Auth0Lock({
-    clientId,
-    domain
-  });
-} else {
-  console.warn('Authentication not enabled: Auth0 configuration not provided');
+function initializeLockComponent() {
+  if (authenticationEnabled) {
+    return new Auth0Lock({
+      clientId,
+      domain
+    });
+  } else {
+    console.warn('Authentication not enabled: Auth0 configuration not provided');
+    return null;
+  }
 }
 
 export function showLogin() {
   if (!authenticationEnabled) {
+    store.dispatch(AuthStateActions.onUserLoginError(''));
     return;
   }
 
@@ -28,7 +31,9 @@ export function showLogin() {
     closable: __DEV__,
   };
 
-  if (Platform.OS === 'ios') {
+  let lock = initializeLockComponent();
+
+  if (lock && Platform.OS === 'ios') {
     lock.customizeTheme({
       A0ThemePrimaryButtonNormalColor: Colors.spacLightGray,
       A0ThemePrimaryButtonHighlightedColor: Colors.spacGold,

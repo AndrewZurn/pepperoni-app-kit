@@ -1,17 +1,16 @@
 import React, {PropTypes} from 'react';
 import {
-    Alert,
-    Dimensions,
-    StyleSheet,
-    ScrollView,
-    TextInput,
-    Text,
-    View
+  Alert,
+  Dimensions,
+  StyleSheet,
+  ScrollView,
+  TextInput,
+  Text,
+  View
 } from 'react-native';
 import {Card, Button} from 'react-native-material-design';
 import Colors from '../../../utils/colors';
 import Picker from 'react-native-picker';
-import RadioButton from 'react-native-radio-button';
 import * as WorkoutState from '../WorkoutState';
 import * as WorkoutUtils from '../../../utils/workoutUtils';
 import * as NavigationState from '../../navigation/NavigationState';
@@ -40,37 +39,18 @@ const WorkoutDetailView = React.createClass({
   getInitialState() {
     return {
       // should be an {exerciseOptionId, isSelected, {exerciseOptionId, isSelected}}
-      selectedExercises: [],
-      timedExerciseOptionIdBeingEdited: null,
+      timedWorkoutBeingEdited: false,
       workoutSubmitted: false,
+      result: null,
+      displayedResult: null,
       workout: null
     };
   },
 
-  componentDidMount() {
+  componentWillMount() {
     let workout = this.props.isStartingWorkout ? this.props.workouts[0] : this.props.completedWorkout;
-    let exerciseOptions = this.props.isStartingWorkout ?
-        WorkoutUtils.getExerciseOptions(workout) : workout.exercise.results;
-    let selectedExercises = exerciseOptions.map(exerciseOption => {
-      let altExerciseOptionId;
-      if (exerciseOption.alternativeExerciseOption) {
-        altExerciseOptionId = exerciseOption.alternativeExerciseOption.id;
-      }
-
-      let exerciseOptionId = exerciseOption.id ? exerciseOption.id : exerciseOption.exerciseOptionId;
-      let {lookupId, value, displayValue} = this._getCompletedOptionValues(exerciseOption);
-
-      return {
-        lookupId,
-        exerciseOptionId,
-        alternativeIsSelected: false,
-        altExerciseOptionId,
-        displayValue: displayValue,
-        value: value
-      };
-    });
-
-    this.setState({...this.state, workout, selectedExercises});
+    let result = this.props.isStartingWorkout ? workout.result : null; // Get the result of the workout.
+    this.setState({...this.state, workout, result});
   },
 
   componentWillUnmount() {
@@ -84,166 +64,37 @@ const WorkoutDetailView = React.createClass({
       loaderHandler.hideLoader();
     }
   },
+
   _closeViewIfWorkoutSuccessfullySaved() {
     if (this.props.completedWorkout && this.state.workoutSubmitted) {
       Alert.alert(
-          'Your Workout Was Saved',
-          'You can view completed workouts from your profile, or adjust ' +
-          'today\'s workout by going to the \'Workout\' tab.',
-          [{text: 'OK', onPress: () => this.props.dispatch(NavigationState.popRoute())}]
+        'Your Workout Was Saved',
+        'You can view completed workouts from your profile, or adjust ' +
+        'today\'s workout by going to the \'Workout\' tab.',
+        [{text: 'OK', onPress: () => this.props.dispatch(NavigationState.popRoute())}]
       );
       this.setState({...this.state, workoutSubmitted: false});
     }
   },
-  _saveCompletedWorkout(completedExerciseResults) {
+
+  _saveCompletedWorkout(result) {
     let workoutId = this.state.workout.id;
     let userId = this.props.fusionUser.id;
-    this.props.dispatch(WorkoutState.saveCompletedWorkout(completedExerciseResults, userId, workoutId));
+    this.props.dispatch(WorkoutState.saveCompletedWorkout(result, userId, workoutId));
   },
 
-  /**
-   * If a workout has already been completed, it will find the saved value/result for the
-   * exercise option, and return both it's value, and it's display value, and it's lookupId.
-   *
-   * @param option The current option to find in the results lists and to find the saved result of.
-   * @returns If the workout hasn't been completed it will return null,
-   *          otherwise it will return the {lookupId, value, displayValue}.
-   * @private
-   */
-  _getCompletedOptionValues(option) {
-    let lookupId;
-    let value;
-    let displayValue;
-    if (this.props.completedWorkout) {
-      let optionId = option.id ? option.id : option.exerciseOptionId;
-      let lookup = this.props.completedWorkout.exercise.results
-          .find(result => optionId === result.exerciseOptionId ||
-          option.alternativeExerciseOption && option.alternativeExerciseOption.id === result.exerciseOptionId);
-
-      // if it was a rep based workout remove the value, else allow the minute/second value to be saved to {value: _}
-      displayValue = lookup.result;
-      value = option.inputType !== 'time' ? lookup.result.split(' ')[0] : lookup.result;
-      lookupId = lookup.lookupId;
+  _updateWorkoutResult(value, displayValueAppender, isEndEditing) {
+    let result;
+    let displayedResult;
+    if (isEndEditing) { // has exited the input picker/keyboard
+      displayedResult = `${value}${displayValueAppender}`;
+      result = value;
     }
-    return {lookupId, value, displayValue};
-  },
-
-  _exerciseOptionIsSelected(exerciseOptionId) {
-    return this.state.selectedExercises
-        .find(option => option.exerciseOptionId === exerciseOptionId ||
-          option.lookupId === exerciseOptionId)
-        .alternativeIsSelected;
-  },
-
-  /**
-   * Will find the exerciseOption for the card that was selected, and update which of the option's is
-   * in the selected position.
-   *
-   * @param exerciseOptionId {uuid} The exercise option/parent of alternative option whose radio button was selected.
-   * @param alternativeIsSelected {boolean} Flag for whether it was the alternative option that was selected or not.
-   * @private
-   */
-  _updateSelectedExerciseOption(exerciseOptionId, alternativeIsSelected) {
-    let updatedSelectedExercises = this.state.selectedExercises.map(option => {
-      if (option.exerciseOptionId === exerciseOptionId) {
-        return {
-          ...option,
-          exerciseOptionId,
-          alternativeIsSelected
-        };
-      } else {
-        return option;
-      }
-    });
-
-    this.setState({...this.state, selectedExercises: updatedSelectedExercises});
-  },
-
-  _getExerciseOptionAmount(exerciseOption) {
-    if (exerciseOption.targetAmount) {
-      return exerciseOption.targetAmount;
-    } else if (exerciseOption.duration) {
-      return exerciseOption.duration;
-    } else {
-      return '';
+    else { // still in input, so keep only the non-appended results displayed
+      displayedResult = value;
+      result = value;
     }
-  },
-
-  _getExerciseOptionDescriptionText(exerciseOption, optionId) {
-    return exerciseOption.description
-        ? <Text style={styles.text} key={'desc_' + optionId}>{exerciseOption.description}</Text> : null;
-  },
-
-  _createAlternativeOptionCard(exerciseOption, optionId) {
-    let alternativeOptionView;
-    if (exerciseOption.alternativeExerciseOption) {
-      const alternativeOption = exerciseOption.alternativeExerciseOption;
-      const altId = alternativeOption.id;
-
-      let alternativeOptionDescText = this._getExerciseOptionDescriptionText(alternativeOption, altId);
-      let amount = this._getExerciseOptionAmount(alternativeOption);
-
-      alternativeOptionView = (
-          <View style={{flexDirection: 'row'}}>
-            <View style={[{flexDirection: 'column'}]}>
-              <View style={styles.radioButtonCentered}>
-                <RadioButton
-                    key={'radio_button_alt_' + optionId}
-                    animation={'bounceIn'}
-                    size={14}
-                    // the user has selected the alternative option
-                    isSelected={this._exerciseOptionIsSelected(exerciseOption.id)}
-                    onPress={() => this._updateSelectedExerciseOption(exerciseOption.id, true)}
-                />
-              </View>
-            </View>
-            <View style={[{flexDirection: 'column'}, styles.columnWrap]}>
-              <Text style={styles.altTitle} key={'name_' + altId}>Alternative: {alternativeOption.name}</Text>
-              <Text style={styles.text}
-                    key={'amt_' + altId}>{alternativeOption.type} - {amount}</Text>
-              {alternativeOptionDescText}
-            </View>
-          </View>
-      );
-    }
-
-    return alternativeOptionView;
-  },
-
-  _getExerciseOption(exerciseOptionId) {
-    return this.state.selectedExercises.find(option => option.exerciseOptionId === exerciseOptionId);
-  },
-
-  _getExerciseOptionDisplayValue(exerciseOptionId) {
-    let foundOption = this._getExerciseOption(exerciseOptionId);
-    return foundOption && foundOption.displayValue ? foundOption.displayValue : '';
-  },
-
-  _updateExerciseOptionValue(exerciseOptionId, value, displayValueAppender, isEndEditing) {
-    let updatedExerciseOptions = this.state.selectedExercises.map(option => {
-      if (option.exerciseOptionId === exerciseOptionId) {
-        let updatedDisplayValue;
-        if (!isEndEditing) { // is still changing the value
-          updatedDisplayValue = value;
-        } else if (value && value.length > 0) { // is done changing the value, displayValueAppender should have space prefixed if needed.
-          updatedDisplayValue = `${value}${displayValueAppender}`;
-        } else { // there is no value to display (value is also null or empty)
-          updatedDisplayValue = null;
-        }
-
-        return {
-          exerciseOptionId,
-          alternativeIsSelected: option.alternativeIsSelected,
-          altExerciseOptionId: option.altExerciseOptionId,
-          displayValue: updatedDisplayValue,
-          value
-        };
-      } else {
-        return option;
-      }
-    });
-
-    this.setState({...this.state, selectedExercises: updatedExerciseOptions});
+    this.setState({...this.state, result, displayedResult});
   },
 
   /**
@@ -254,68 +105,82 @@ const WorkoutDetailView = React.createClass({
    * If the view is in 'read-only' (!this.props.isStartinWorkout) mode, it will return a label
    * that will be displayed rather than in Input component.
    */
-  _getInputComponent(exerciseOption) {
-    let exerciseOptionId = exerciseOption.id ? exerciseOption.id : exerciseOption.exerciseOptionId;
-    if (!this.props.isStartingWorkout) { // return the 'read-only' mode
-      return (
-          <Text style={[styles.text, {color: Colors.spacGold}]}>
-            Result: {this._getExerciseOptionDisplayValue(exerciseOptionId)}
-          </Text>
-      );
+  _getInputComponent(workout) {
+
+    let result;
+    if (this.props.completedWorkout) {
+      // return the result of the workout
+      result = this.props.completedWorkout.result;
+      if (!this.props.isStartingWorkout) { // return the 'read-only' mode
+        return <Text style={[styles.text, {color: Colors.spacGold}]}>Result: {result}</Text>;
+      }
     }
 
-    if (exerciseOption.inputType === 'time') {
+    if (workout.workoutType === 'TASK') {
       return (
-          <Button
-              text={this._getTimedButtonText(exerciseOptionId)}
-              raised={true}
-              overrides={{
-                textColor: Colors.defaultButtonColor,
-                backgroundColor: Colors.spacMediumGray,
-                rippleColor: Colors.spacLightGray
-              }}
-              onPress={() => {
-                if (exerciseOption.inputType === 'time' && this.picker) {
-                  this.picker.toggle();
-                  this.setState({...this.state, timedExerciseOptionIdBeingEdited: exerciseOptionId});
-                }
-              }}
-          />
+        <Button
+          text={this._getTimedButtonText()}
+          raised={true}
+          overrides={{
+            textColor: Colors.defaultButtonColor,
+            backgroundColor: Colors.spacMediumGray,
+            rippleColor: Colors.spacLightGray
+          }}
+          onPress={() => {
+            if (workout.workoutType === 'TASK' && this.picker) {
+              this.picker.toggle();
+              this.setState({...this.state, timedWorkoutBeingEdited: true});
+            }
+          }}
+        />
       );
-    } else if (exerciseOption.inputType === 'NA') {
+    } else if (workout.workoutType === 'NA') {
       return null;
     } else { // numeric
       let resultsDisplayFieldName;
       let resultsDisplayFieldAppender; // should be applied to the value of the field when entered/present (and not being edited)
-      if (exerciseOption.type.toUpperCase() === 'HEAVY') {
+      if (workout.workoutType === 'HEAVY') {
         resultsDisplayFieldName = ' Weight';
         resultsDisplayFieldAppender = 'lbs';
       } else {
         resultsDisplayFieldName = 'Repetitions';
-        resultsDisplayFieldAppender = ' Reps';
+        resultsDisplayFieldAppender = ' Repetitions';
       }
 
       let resultsPlaceholderText = `Enter ${resultsDisplayFieldName}`;
+      if (this.props.completedWorkout && !this.state.displayedResult) {
+        this.setState({...this.state, result, displayedResult: `${result} ${resultsDisplayFieldName}`});
+      }
+
       return (
-          <View style={styles.textInputParent}>
-            <TextInput
-                style={[styles.textInput]}
-                keyboardType='numeric'
-                // different displayValue when done editing to display something like (ie '50 Reps' or '200 lbs')
-                onEndEditing={() => { // done dditing, add the appender to use as the displayValue
-                  let value = this._getExerciseOption(exerciseOptionId).value;
-                  this._updateExerciseOptionValue(exerciseOptionId, value, resultsDisplayFieldAppender, true);
-                }}
-                onFocus={() => { // reset the text box to use just the value (and not the displayValue)
-                  let value = this._getExerciseOption(exerciseOptionId).value;
-                  this._updateExerciseOptionValue(exerciseOptionId, value, value, false);
-                }}
-                onChangeText={(text) => this._updateExerciseOptionValue(exerciseOptionId, text, '', false) }
-                placeholder={resultsPlaceholderText}
-                placeholderTextColor={Colors.spacGold}
-                value={this._getExerciseOptionDisplayValue(exerciseOptionId)}/>
-          </View>
+        <View>
+          <TextInput
+            style={[styles.textInput, {marginRight: 5, marginLeft: 5}]}
+            keyboardType='numeric'
+            // different displayValue when done editing to display something like (ie '50 Reps' or '200 lbs')
+            onEndEditing={() => { // done editing, add the appender to use as the displayValue
+              let value = this._getParsedResultValue(this.state.result);
+              this._updateWorkoutResult(value, resultsDisplayFieldAppender, true);
+            }}
+            onFocus={() => { // reset the text box to use just the value (and not the displayValue)
+              let value = this._getParsedResultValue(this.state.result);
+              this._updateWorkoutResult(value, value, false);
+            }}
+            onChangeText={(text) => this._updateWorkoutResult(text, '', false) }
+            placeholder={resultsPlaceholderText}
+            placeholderTextColor={Colors.spacGold}
+            value={this.state.displayedResult}/>
+        </View>
       );
+    }
+  },
+
+  _getParsedResultValue(result) {
+    if (result && result.length > 0) {
+      let value = result.split(' ')[0];
+      return value;
+    } else {
+      return '';
     }
   },
 
@@ -326,61 +191,25 @@ const WorkoutDetailView = React.createClass({
     let workout = this.state.workout;
 
     let duration = WorkoutUtils.getDuration(workout);
-    let workoutDescription = WorkoutUtils.getExerciseInstructions(workout);
+    let durationText = duration ? <Text style={styles.text}>Duration: {duration}</Text> : null;
+    let instructions = WorkoutUtils.getWorkoutInstructions(workout);
+    let instructionsText = instructions && instructions.length > 0 ?
+      <Text style={styles.text}>Instructions: {instructions}</Text> : null;
 
     // create views for the selected options
-    let exerciseOptionsCards = WorkoutUtils.getExerciseOptions(workout).map(exerciseOption => {
-      let optionId = exerciseOption.id ? exerciseOption.id : exerciseOption.exerciseOptionId;
-
-      // create alternative exercise option view (only display if it is actually doing a workout)
-      let alternativeOptionView;
-      if (this.props.isStartingWorkout) {
-        alternativeOptionView = this._createAlternativeOptionCard(exerciseOption, optionId);
-      }
-
-      // get the optional description for display if found
-      let exerciseOptionDescriptionText = this._getExerciseOptionDescriptionText(exerciseOption, optionId);
-
-      // get the amount (targetAmount or duration) of the exercise option.
-      let amount = this._getExerciseOptionAmount(exerciseOption);
-
-      // get the input type for the display type of the exercise option
-      let inputComponent = this._getInputComponent(exerciseOption);
-
-      let radioButtonColumn;
-      if (this.props.isStartingWorkout) {
-        radioButtonColumn = (
-            <View style={[{flexDirection: 'column'}]}>
-              <View style={styles.radioButtonCentered}>
-                <RadioButton
-                    key={'radio_button_' + optionId}
-                    animation={'bounceIn'}
-                    size={14}
-                    // the user selected the primary option
-                    isSelected={!this._exerciseOptionIsSelected(exerciseOption.id)}
-                    onPress={() => this._updateSelectedExerciseOption(exerciseOption.id, false)}
-                />
-              </View>
-            </View>
-        );
-      }
+    let exerciseCards = WorkoutUtils.getExercises(workout).map(exercise => {
+      let exerciseId = exercise.id;
 
       return (
-          <Card style={styles.card} key={'card_' + optionId}>
-            <Card.Body key={'card_body_' + optionId}>
-              <View style={{flexDirection: 'row', marginBottom: 10}}>
-                {radioButtonColumn}
-                <View style={[{flexDirection: 'column'}, styles.columnWrap]}>
-                  <Text style={styles.workoutTitle} key={'name_' + optionId}>{exerciseOption.name}</Text>
-                  <Text style={styles.text} key={'amt_' + optionId}>{exerciseOption.type} - {amount}</Text>
-                  {exerciseOptionDescriptionText}
-                </View>
-              </View>
-              {alternativeOptionView}
-
-              {inputComponent}
-            </Card.Body>
-          </Card>
+        <Card style={styles.card} key={'card_' + exerciseId}>
+          <Card.Body key={'card_body_' + exerciseId}>
+            <View>
+              <Text style={styles.workoutTitle} key={'name_' + exerciseId}>{exercise.name}</Text>
+              <Text style={styles.text} key={'amt_' + exerciseId}>{exercise.amount}</Text>
+              {/*{alternativeOptionView}*/}
+            </View>
+          </Card.Body>
+        </Card>
       );
     });
 
@@ -388,96 +217,77 @@ const WorkoutDetailView = React.createClass({
     let completedWorkoutButton;
     if (this.props.isStartingWorkout) {
       completedWorkoutButton = (
-          <View style={{marginTop: 4, marginBottom: 4}}>
-            <Button
-                text='Complete Workout'
-                raised={true}
-                overrides={{
-                  textColor: Colors.defaultButtonColor,
-                  backgroundColor: Colors.spacLightGray,
-                  rippleColor: Colors.spacMediumGray
-                }}
-                onPress={this._submitCompletedWorkout}
-            />
-          </View>
+        <View style={{marginTop: 4, marginBottom: 4}}>
+          <Button
+            text='Complete Workout'
+            raised={true}
+            overrides={{
+              textColor: Colors.defaultButtonColor,
+              backgroundColor: Colors.spacLightGray,
+              rippleColor: Colors.spacMediumGray
+            }}
+            onPress={this._submitCompletedWorkout}
+          />
+        </View>
       );
     }
 
+    // TODO: fix me... figure out why the 'workout' is different
+    let localWorkout = this.props.isStartingWorkout ? workout.workout : workout.scheduledWorkout.workout;
     // ACTUAL RENDER RETURN
     return (
-        <View style={styles.container} onLayout={this.getWorkout}>
-          <Card style={styles.card}>
-            <Card.Body>
-              <Text style={styles.text}>Duration: {duration}</Text>
-              <Text style={styles.text}>Instructions: {workoutDescription}</Text>
-            </Card.Body>
-          </Card>
+      <View style={styles.container}>
+        <Card style={styles.card}>
+          <Card.Body>
+            {durationText}
+            {instructionsText}
+          </Card.Body>
+        </Card>
+        <ScrollView ref='scrollView'
+                    keyboardDismissMode='interactive'
+                    style={styles.scrollView}>
+          {exerciseCards}
+        </ScrollView>
+        {this._getInputComponent(localWorkout)}
+        {completedWorkoutButton}
 
-          <ScrollView ref='scrollView'
-                      keyboardDismissMode='interactive'
-                      style={styles.scrollView}>
-            {exerciseOptionsCards}
-          </ScrollView>
-          {completedWorkoutButton}
-
-          {/* // picker for timed based results (displays minutes and seconds)*/}
-          <Picker
-              ref={picker => {
-                this.picker = picker;
-                return;
-              }}
-              style={{height: 280}}
-              pickerElevation={100}
-              pickerTitle={'Completed In'}
-              pickerCancelBtnText={'Close'}
-              pickerBtnText={'Save'}
-              showMask={true}
-              pickerToolBarStyle={{backgroundColor: Colors.spacMediumGray, height: 35}}
-              pickerTitleStyle={styles.altTitle}
-              pickerData={[this._getMinutesArray(), this._getSecondsArray()]} //picker`s value List
-              selectedValue={[`0 ${MINUTES_TEXT_VALUE}`, `0 ${SECONDS_TEXT_VALUE}`]} //default to be selected value
-              onPickerDone={(value) => {
-                let parsedPickerValue = this._parseValueFromTimedBasedExerciseResult(value);
-                this._updateExerciseOptionValue(this.state.timedExerciseOptionIdBeingEdited, parsedPickerValue, '', true);
-              }}
-          />
-          <BusyIndicator />
-        </View>
+        {/* // picker for timed based results (displays minutes and seconds)*/}
+        <Picker
+          ref={picker => {
+            this.picker = picker;
+            return;
+          }}
+          style={{height: 280}}
+          pickerElevation={100}
+          pickerTitle={'Completed In'}
+          pickerCancelBtnText={'Close'}
+          pickerBtnText={'Save'}
+          showMask={true}
+          pickerToolBarStyle={{backgroundColor: Colors.spacMediumGray, height: 35}}
+          pickerTitleStyle={styles.altTitle}
+          pickerData={[this._getMinutesArray(), this._getSecondsArray()]} //picker`s value List
+          selectedValue={[`0 ${MINUTES_TEXT_VALUE}`, `0 ${SECONDS_TEXT_VALUE}`]} //default to be selected value
+          onPickerDone={(value) => {
+            let parsedPickerValue = this._parseValueFromTimedBasedExerciseResult(value);
+            this._updateWorkoutResult(parsedPickerValue, '', true);
+          }}
+        />
+        <BusyIndicator />
+      </View>
     );
   },
 
   _submitCompletedWorkout() {
-    let incompletedExerciseIds = this.state.selectedExercises
-        .filter(option => option.value === null)
-        .map(option => option.exerciseOptionId);
-    if (incompletedExerciseIds.length > 0) {
-      this._incompletedWorkoutAlert(incompletedExerciseIds);
+    if (this.state.result === null || this.state.result.length < 0) {
+      Alert.alert(
+        'Cannot Submit Incomplete Workout',
+        `Please enter your results for this workout.`,
+        [{text: 'OK', onPress: () => console.log('Incomplete workouts OK button Pressed')}]
+      );
     } else {
-      let completedWorkoutRequestBody = this.state.selectedExercises.map(option => {
-        let selectedOptionId = option.alternativeIsSelected ? option.altExerciseOptionId : option.exerciseOptionId;
-        return {
-          lookupId: option.lookupId,
-          exerciseOptionId: selectedOptionId,
-          result: option.displayValue
-        };
-      });
-
-      this._saveCompletedWorkout(completedWorkoutRequestBody);
+      this._saveCompletedWorkout(this.state.result);
       this.setState({...this.state, workoutSubmitted: true});
     }
-  },
-
-  _incompletedWorkoutAlert(incompletedExerciseIds) {
-    let workout = this.state.workout();
-    let incompleteExerciseNames = WorkoutUtils.getExerciseOptions(workout)
-        .filter(option => incompletedExerciseIds.includes(option.id))
-        .map(option => option.name)
-        .join(', ');
-    Alert.alert(
-        'Cannot Submit Incompleted Workout',
-        `Please provide your results for the following exercises: ${incompleteExerciseNames}`,
-        [{text: 'OK', onPress: () => console.log('Incomplete workouts OK button Pressed')}]
-    );
   },
 
   _parseValueFromTimedBasedExerciseResult(value) {
@@ -495,29 +305,18 @@ const WorkoutDetailView = React.createClass({
     return `${minutes} ${seconds}`;
   },
 
-  _getTimedButtonText(exerciseOptionId) {
-    let foundOption = this._getExerciseOption(exerciseOptionId);
-    return foundOption && foundOption.displayValue ? foundOption.displayValue : 'Enter Timed Results';
+  _getTimedButtonText() {
+    return this.state.displayedResult ? this.state.displayedResult : 'Enter Timed Results';
   },
 
   _getMinutesArray() {
-    return [...Array(31).keys()].map(i => {
-      if (i % 10 === 0) {
-        return `${i} ${MINUTES_TEXT_VALUE}`;
-      } else {
-        return `${i}`;
-      }
-    });
+    return [...Array(31).keys()]
+      .map(i => i % 10 === 0 ? `${i} ${MINUTES_TEXT_VALUE}` : `${i}`);
   },
 
   _getSecondsArray() {
-    return [...Array(60).keys()].map(i => {
-      if (i % 10 === 0) {
-        return `${i} ${SECONDS_TEXT_VALUE}`;
-      } else {
-        return `${i}`;
-      }
-    });
+    return [...Array(60).keys()]
+      .map(i => i % 10 === 0 ? `${i} ${SECONDS_TEXT_VALUE}` : `${i}`);
   }
 });
 
@@ -559,7 +358,6 @@ const styles = StyleSheet.create({
   },
   textInput: {
     height: 35,
-    width: width * EXERCISE_OPTION_INPUT_WIDTH,
     textAlign: 'center',
     backgroundColor: Colors.spacLightGray,
     color: Colors.spacGold,
@@ -575,10 +373,6 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1
-  },
-  columnWrap: {
-    flexWrap: 'wrap',
-    flex: 0.8
   }
 });
 

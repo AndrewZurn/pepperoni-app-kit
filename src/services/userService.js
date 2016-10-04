@@ -3,14 +3,15 @@ import * as configuration from '../utils/configuration';
 
 const API_FAILED_REQUEST_WARNING = configuration.getConfiguration('API_FAILED_REQUEST_WARNING_MESSAGE');
 const USERS_BASE_PATH = configuration.getConfiguration('USERS_PATH');
+const SCHEDULED_WORKOUT_BASE_PATH = configuration.getConfiguration('SCHEDULED_WORKOUTS_PATH');
 const USER_BY_ID_PATH = userId => USERS_BASE_PATH + `/${userId}`;
 const CAN_USER_UNLOCK_WORKOUT = fusionUserId => USER_BY_ID_PATH(fusionUserId) + '/remaining-workout-unlocks';
 const USER_BY_AUTH0_ID_PATH = auth0UserId => USERS_BASE_PATH + `/auth0/${auth0UserId}`;
 const GET_COMPLETED_WORKOUTS_PATH = (fusionUserId, page) => {
-  return USER_BY_ID_PATH(fusionUserId) + `/workouts?page=${page}&pageSize=150`;
+  return USER_BY_ID_PATH(fusionUserId) + `${SCHEDULED_WORKOUT_BASE_PATH}?page=${page}&pageSize=150`;
 };
 const COMPLETED_WORKOUTS_PATH = (fusionUserId, workoutId) => {
-  return USER_BY_ID_PATH(fusionUserId) + `/workouts/${workoutId}`;
+  return USER_BY_ID_PATH(fusionUserId) + `${SCHEDULED_WORKOUT_BASE_PATH}/${workoutId}`;
 };
 
 export async function getUser(userId) {
@@ -54,10 +55,11 @@ export async function updateUser(user) {
       .catch(error => console.error(`Error during updateUser. Error: ${error}`));
 }
 
-export async function saveCompletedWorkout(completedExerciseResults, userId, workoutId) {
+export async function saveCompletedWorkout(result, userId, workoutId) {
+  debugger;
   return api.post(
       COMPLETED_WORKOUTS_PATH(userId, workoutId),
-      {results: completedExerciseResults},
+      {result},
       API_FAILED_REQUEST_WARNING
   ).then(response => {
     if (response.status === 201) {

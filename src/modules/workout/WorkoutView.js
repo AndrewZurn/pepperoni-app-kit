@@ -1,9 +1,9 @@
 import React, {PropTypes} from 'react';
 import {
-    Alert,
-    View,
-    StyleSheet,
-    Text
+  Alert,
+  View,
+  StyleSheet,
+  Text
 } from 'react-native';
 import Colors from '../../utils/colors';
 import * as NavigationState from '../../modules/navigation/NavigationState';
@@ -31,11 +31,11 @@ const WorkoutView = React.createClass({
   },
   _handlerStateErrors() {
     if (this.props.isInView &&
-        this.props.error && this.props.error.type && this.props.error.message) {
+      this.props.error && this.props.error.type && this.props.error.message) {
       let errorType = this.props.error.type;
       if (errorType === WorkoutState.GET_TODAYS_WORKOUT_RESPONSE ||
-          errorType === WorkoutState.GET_USER_REMAINING_WORKOUT_UNLOCKS_RESPONSE ||
-          errorType === WorkoutState.GET_WORKOUT_RESPONSE) {
+        errorType === WorkoutState.GET_USER_REMAINING_WORKOUT_UNLOCKS_RESPONSE ||
+        errorType === WorkoutState.GET_WORKOUT_RESPONSE) {
         this.props.dispatch(WorkoutState.errorAcknowledged());
         this._displayError(this.props.error.message);
       }
@@ -45,10 +45,12 @@ const WorkoutView = React.createClass({
     var displayErrors = Immutable.fromJS(this.state.currentDisplayedErrors);
     if (!displayErrors.includes(message)) {
       Alert.alert(
-          'Workout Error',
-          this.props.error.message,
-          [{text: 'OK',
-            onPress: () => this.setState({...this.state, currentDisplayedErrors: displayErrors.pop(message)})}]
+        'Workout Error',
+        this.props.error.message,
+        [{
+          text: 'OK',
+          onPress: () => this.setState({...this.state, currentDisplayedErrors: displayErrors.pop(message)})
+        }]
       );
       this.setState({...this.state, currentDisplayedErrors: displayErrors.push(message)});
     }
@@ -70,7 +72,7 @@ const WorkoutView = React.createClass({
   },
   openWorkoutDetail() {
     this.props.dispatch(WorkoutState.setupForWorkoutDetails(true));
-    let title = WorkoutUtils.getName(this.props.workouts[0]);
+    let title = WorkoutUtils.getWorkoutName(this.props.workouts[0]);
     this.props.dispatch(NavigationState.pushRoute({key: 'DetailsForWorkout', title}));
   },
 
@@ -86,29 +88,29 @@ const WorkoutView = React.createClass({
     let workoutCard;
     if (this.props.workouts && this.props.workouts.length > 0) {
       workoutCard = (
-          <WorkoutCard workout={this.props.workouts[0]}
-                       displayDay={false}
-                       displayRightButton={canUnlockWorkout}
-                       displayRightButtonText={unlockWorkoutButtonText}
-                       rightButtonAction={this.openWorkoutDetail}
-          />
+        <WorkoutCard workout={this.props.workouts[0]}
+                     displayDay={false}
+                     displayRightButton={canUnlockWorkout}
+                     displayRightButtonText={unlockWorkoutButtonText}
+                     rightButtonAction={this.openWorkoutDetail}
+        />
       );
     }
 
     let remainingWorkoutsText;
     if (this.props.remainingWorkoutUnlocks) {
       remainingWorkoutsText = (
-          <Text style={styles.remainingWorkoutsText}>
-            Remaining Workout this Week: {this.props.remainingWorkoutUnlocks}
-          </Text>
+        <Text style={styles.remainingWorkoutsText}>
+          Remaining Workout this Week: {this.props.remainingWorkoutUnlocks}
+        </Text>
       );
     }
 
     return (
-        <View style={styles.container} onLayout={this.setupForWorkout}>
-          {workoutCard}
-          {remainingWorkoutsText}
-        </View>
+      <View style={styles.container} onLayout={this.setupForWorkout}>
+        {workoutCard}
+        {remainingWorkoutsText}
+      </View>
     );
   }
 });

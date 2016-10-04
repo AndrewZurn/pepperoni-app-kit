@@ -25,11 +25,11 @@ const ScheduleView = React.createClass({
   render() {
     let workoutCard = this.props.workouts.map((workout, index) =>
       <WorkoutCard
-          key={'workout-card-' + index}
-          workout={workout}
-          displayDay={true}
-          displayRightButton={false}/>
-      );
+        key={'workout-card-' + index}
+        workout={workout}
+        displayDay={true}
+        displayRightButton={false}/>
+    );
 
     return (
       <View style={styles.container} onLayout={this.getWeeksRemainingWorkouts}>

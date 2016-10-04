@@ -77,10 +77,10 @@ export function setupForWorkoutDetails(isStartingWorkout) {
   };
 }
 
-export function saveCompletedWorkout(completedExerciseResults, userId, workoutId) {
+export function saveCompletedWorkout(result, userId, workoutId) {
   return {
     type: SAVE_COMPLETED_WORKOUT_REQUEST,
-    completedExerciseResults,
+    result,
     userId,
     workoutId
   };
@@ -131,10 +131,10 @@ export async function requestRemainingWorkoutUnlocks(userId) {
   };
 }
 
-export async function requestSaveCompletedWorkout(completedExerciseResults, userId, workoutId) {
+export async function requestSaveCompletedWorkout(result, userId, workoutId) {
   return {
     type: SAVE_COMPLETED_WORKOUT_RESPONSE,
-    payload: await UserService.saveCompletedWorkout(completedExerciseResults, userId, workoutId),
+    payload: await UserService.saveCompletedWorkout(result, userId, workoutId),
     receivedAt: Date.now()
   };
 }
@@ -143,35 +143,35 @@ export async function requestSaveCompletedWorkout(completedExerciseResults, user
 export default function WorkoutStateReducer(state = initialState, action = {}) {
   switch (action.type) {
 
-      // REQUESTS
+    // REQUESTS
     case GET_WORKOUTS_REQUEST:
       return loop(
-          state.set('loading', true),
-          Effects.promise(requestGetWorkouts)
+        state.set('loading', true),
+        Effects.promise(requestGetWorkouts)
       );
 
     case GET_WORKOUT_REQUEST:
       return loop(
-          state.set('loading', true),
-          Effects.promise(requestGetWorkout, action.id)
+        state.set('loading', true),
+        Effects.promise(requestGetWorkout, action.id)
       );
 
     case GET_TODAYS_WORKOUT_REQUEST:
       return loop(
-          state.set('loading', true),
-          Effects.promise(requestGetTodaysWorkout, action.userId)
+        state.set('loading', true),
+        Effects.promise(requestGetTodaysWorkout, action.userId)
       );
 
     case GET_COMPLETED_WORKOUT_REQUEST:
       return loop(
-          state.set('loading', true),
-          Effects.promise(getCompletedWorkout, action.userId, action.workoutId)
+        state.set('loading', true),
+        Effects.promise(getCompletedWorkout, action.userId, action.workoutId)
       );
 
     case GET_USER_REMAINING_WORKOUT_UNLOCKS_REQUEST:
       return loop(
-          state.set('loading', true),
-          Effects.promise(requestRemainingWorkoutUnlocks, action.userId)
+        state.set('loading', true),
+        Effects.promise(requestRemainingWorkoutUnlocks, action.userId)
       );
 
     case SETUP_FOR_WORKOUT_DETAILS:
@@ -179,9 +179,8 @@ export default function WorkoutStateReducer(state = initialState, action = {}) {
 
     case SAVE_COMPLETED_WORKOUT_REQUEST:
       return loop(
-          state.set('loading', true),
-          Effects.promise(requestSaveCompletedWorkout,
-              action.completedExerciseResults, action.userId, action.workoutId)
+        state.set('loading', true),
+        Effects.promise(requestSaveCompletedWorkout, action.result, action.userId, action.workoutId)
       );
 
     case SET_COMPLETED_WORKOUT:
@@ -193,75 +192,75 @@ export default function WorkoutStateReducer(state = initialState, action = {}) {
 
     case GET_WORKOUTS_RESPONSE:
       return state
-          .set('loading', false)
-          .set('workouts', action.payload);
+        .set('loading', false)
+        .set('workouts', action.payload);
 
     case GET_WORKOUT_RESPONSE:
       if (action.payload && action.payload.id) {
         return state
-            .set('loading', false)
-            .set('workouts', [action.payload]);
+          .set('loading', false)
+          .set('workouts', [action.payload]);
       } else {
         return state
-            .set('loading', false)
-            .set('error', {
-              type: GET_WORKOUT_RESPONSE,
-              message: 'Could not find workout. Please try again later.'
-            });
+          .set('loading', false)
+          .set('error', {
+            type: GET_WORKOUT_RESPONSE,
+            message: 'Could not find workout. Please try again later.'
+          });
       }
 
     case GET_TODAYS_WORKOUT_RESPONSE:
       if (action.payload && action.payload.id) {
         return loop(
-            state.set('workouts', [action.payload]),
-            Effects.promise(requestGetCompletedWorkout, action.userId, action.payload.id)
+          state.set('workouts', [action.payload]),
+          Effects.promise(requestGetCompletedWorkout, action.userId, action.payload.id)
         );
       } else {
         return state
-            .set('loading', false)
-            .set('error', {
-              type: GET_TODAYS_WORKOUT_RESPONSE,
-              message: 'Could not find today\'s workout. Please try again later.'
-            });
+          .set('loading', false)
+          .set('error', {
+            type: GET_TODAYS_WORKOUT_RESPONSE,
+            message: 'Could not find today\'s workout. Please try again later.'
+          });
       }
 
     case GET_COMPLETED_WORKOUT_RESPONSE:
       if (action.payload && action.payload.completedWorkout && action.payload.completedWorkout.id) {
         return state
-            .set('loading', false)
-            .set('completedWorkout', action.payload.completedWorkout);
+          .set('loading', false)
+          .set('completedWorkout', action.payload.completedWorkout);
       } else {
         return state
-            .set('loading', false)
-            .set('error', {
-              type: GET_COMPLETED_WORKOUT_RESPONSE,
-              message: 'Could not find information on completed workout.'
-            });
+          .set('loading', false)
+          .set('error', {
+            type: GET_COMPLETED_WORKOUT_RESPONSE,
+            message: 'Could not find information on completed workout.'
+          });
       }
 
     case GET_USER_REMAINING_WORKOUT_UNLOCKS_RESPONSE:
       if (action.payload && action.payload.remainingWorkoutUnlocks) {
         return state
-            .set('loading', false)
-            .set('remainingWorkoutUnlocks', action.payload.remainingWorkoutUnlocks);
+          .set('loading', false)
+          .set('remainingWorkoutUnlocks', action.payload.remainingWorkoutUnlocks);
       } else {
         return state
-            .set('loading', false)
-            .set('remainingWorkoutUnlocks', 0)
-            .set('error', {
-              type: GET_USER_REMAINING_WORKOUT_UNLOCKS_RESPONSE,
-              message: 'Could not retrieve information on remaining workout unlocks for the week.' +
-              ' Please try again later.'
-            });
+          .set('loading', false)
+          .set('remainingWorkoutUnlocks', 0)
+          .set('error', {
+            type: GET_USER_REMAINING_WORKOUT_UNLOCKS_RESPONSE,
+            message: 'Could not retrieve information on remaining workout unlocks for the week.' +
+            ' Please try again later.'
+          });
       }
 
     case SAVE_COMPLETED_WORKOUT_RESPONSE:
       // don't update count if were editing the already saved workout
       return state
-          .update('remainingWorkoutUnlocks', value => !state.get('completedWorkout') ? value - 1 : value)
-          .set('loading', false)
-          .set('completedWorkout', action.payload.completedWorkout)
-          .set('saveCompletedWorkoutErrors', action.payload.saveCompletedWorkoutErrors);
+        .update('remainingWorkoutUnlocks', value => !state.get('completedWorkout') ? value - 1 : value)
+        .set('loading', false)
+        .set('completedWorkout', action.payload.completedWorkout)
+        .set('saveCompletedWorkoutErrors', action.payload.saveCompletedWorkoutErrors);
 
     default:
       return state;

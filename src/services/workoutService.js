@@ -2,7 +2,7 @@ import * as api from '../utils/api';
 import * as configuration from '../utils/configuration';
 
 const API_FAILED_REQUEST_WARNING = configuration.getConfiguration('API_FAILED_REQUEST_WARNING_MESSAGE');
-const WORKOUTS_BASE_PATH = configuration.getConfiguration('WORKOUTS_PATH');
+const WORKOUTS_BASE_PATH = configuration.getConfiguration('SCHEDULED_WORKOUTS_PATH');
 const GET_WORKOUT_BY_ID_PATH = workoutId => { return WORKOUTS_BASE_PATH + `/${workoutId}`; };
 const GET_TODAYS_WORKOUT_PATH = WORKOUTS_BASE_PATH + '/today';
 const GET_WEEKS_REMAINING_WORKOUTS_PATH = WORKOUTS_BASE_PATH + '/week';

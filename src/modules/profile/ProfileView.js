@@ -1,12 +1,12 @@
 import React, {PropTypes} from 'react';
 import {
-    Dimensions,
-    ListView,
-    Text,
-    TextInput,
-    TouchableHighlight,
-    View,
-    StyleSheet
+  Dimensions,
+  ListView,
+  Text,
+  TextInput,
+  TouchableHighlight,
+  View,
+  StyleSheet
 } from 'react-native';
 import {Card} from 'react-native-material-design';
 import moment from 'moment';
@@ -51,7 +51,7 @@ const ProfileView = React.createClass({
   openWorkoutDetail(workout) {
     this.props.dispatch(WorkoutState.setCompletedWorkout(workout));
     this.props.dispatch(WorkoutState.setupForWorkoutDetails(false));
-    let title = WorkoutUtils.getName(workout);
+    let title = WorkoutUtils.getWorkoutName(workout);
     this.props.dispatch(NavigationState.pushRoute({key: 'DetailsForWorkout', title}));
   },
 
@@ -135,108 +135,107 @@ const ProfileView = React.createClass({
     let completedWorkoutsDataSource = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
     if (this.props.completedWorkouts && this.props.completedWorkouts.length > 0) {
       completedWorkoutsDataSource = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2})
-          .cloneWithRows(this.props.completedWorkouts);
+        .cloneWithRows(this.props.completedWorkouts);
     }
 
     return (
-        <View style={styles.container}>
-          <Card style={styles.card}>
-            <Card.Body>
-              <Text style={styles.title}>{userName}</Text>
-              <Text style={styles.text}>{userEmail}</Text>
-              <Text style={[styles.text, styles.moreMarginBottom]}>
-                Fusion Level: {userFusionLevel}
-              </Text>
+      <View style={styles.container}>
+        <Card style={styles.card}>
+          <Card.Body>
+            <Text style={styles.title}>{userName}</Text>
+            <Text style={styles.text}>{userEmail}</Text>
+            <Text style={[styles.text, styles.moreMarginBottom]}>
+              Fusion Level: {userFusionLevel}
+            </Text>
 
-              <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-                <View style={[styles.textInputParent, {flexDirection: 'column'}]}>
-                  <Text style={styles.text}>Height</Text>
-                  <TextInput
-                      style={styles.textEditThirdWidth}
-                      keyboardType='numeric'
-                      onEndEditing={() => {
-                        if (this.state.updatedHeight !== null) {
-                          this.props.fusionUser.height = parseFloat(this.state.updatedHeight);
-                          this.setState({...this.state, updatedHeight: null});
-                          this.updateFusionUser(this.props.fusionUser);
-                          this.updatedProfileNotification();
-                        }
-                      }}
-                      onChangeText={(text) => this.setState({...this.state, updatedHeight: text}) }
-                      placeholder='Enter height'
-                      placeholderTextColor={Colors.spacGold}
-                      value={userHeight}/>
-                </View>
-
-                <View style={[styles.textInputParent, {flexDirection: 'column'}]}>
-                  <Text style={styles.text}>Weight</Text>
-                  <TextInput
-                      style={[styles.textEditThirdWidth]}
-                      keyboardType='numeric'
-                      onEndEditing={() => {
-                        if (this.state.updatedWeight !== null) {
-                          this.props.fusionUser.weight = parseFloat(this.state.updatedWeight);
-                          this.setState({...this.state, updatedWeight: null});
-                          this.updateFusionUser(this.props.fusionUser);
-                          this.updatedProfileNotification();
-                        }
-                      }}
-                      onChangeText={(text) => this.setState({...this.state, updatedWeight: text}) }
-                      placeholder='Enter weight'
-                      placeholderTextColor={Colors.spacGold}
-                      value={userWeight}/>
-                </View>
-
-                <View style={[styles.textInputParent, {flexDirection: 'column'}]}>
-                  <Text style={styles.text}>Age</Text>
-                  <TextInput
-                      style={[styles.textEditThirdWidth]}
-                      keyboardType='numeric'
-                      onEndEditing={() => {
-                        if (this.state.updatedAge !== null) {
-                          this.props.fusionUser.age = parseInt(this.state.updatedAge);
-                          this.setState({...this.state, updatedAge: null});
-                          this.updateFusionUser(this.props.fusionUser);
-                          this.updatedProfileNotification();
-                        }
-                      }}
-                      onChangeText={(text) => this.setState({...this.state, updatedAge: text}) }
-                      placeholder='Enter age'
-                      placeholderTextColor={Colors.spacGold}
-                      value={userAge}/>
-                </View>
+            <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+              <View style={[styles.textInputParent, {flexDirection: 'column'}]}>
+                <Text style={styles.text}>Height</Text>
+                <TextInput
+                  style={styles.textEditThirdWidth}
+                  keyboardType='numeric'
+                  onEndEditing={() => {
+                    if (this.state.updatedHeight !== null) {
+                      this.props.fusionUser.height = parseFloat(this.state.updatedHeight);
+                      this.setState({...this.state, updatedHeight: null});
+                      this.updateFusionUser(this.props.fusionUser);
+                      this.updatedProfileNotification();
+                    }
+                  }}
+                  onChangeText={(text) => this.setState({...this.state, updatedHeight: text}) }
+                  placeholder='Enter height'
+                  placeholderTextColor={Colors.spacGold}
+                  value={userHeight}/>
               </View>
 
-            </Card.Body>
-          </Card>
-
-          <Card style={styles.card}>
-            <Card.Body>
-              <Text style={styles.title}>Completed Workouts</Text>
-              <ListView
-                  dataSource={completedWorkoutsDataSource}
-                  style={styles.listView}
-                  renderSeparator={(sectionId, rowId) => <View key={rowId} style={styles.separator}/>}
-                  renderRow={(workout) => {
-                    let day = moment(workout.completedDate).format('dddd');
-                    let date = moment(workout.completedDate).format('MMM Do');
-                    return (
-                        <TouchableHighlight onPress={() => this.openWorkoutDetail(workout)}
-                                            underlayColor='#dddddd'>
-                          <View style={{paddingTop: 7, paddingBottom: 7}}>
-                            <Text style={styles.text} key={workout.id + '_day'}>{day} - {date}</Text>
-                            <Text style={styles.text} key={workout.id + '_name'}>{workout.exercise.name}</Text>
-                            <Text style={styles.text} key={workout.id + '_text'}>{workout.previewText}</Text>
-                          </View>
-                        </TouchableHighlight>
-                    );
+              <View style={[styles.textInputParent, {flexDirection: 'column'}]}>
+                <Text style={styles.text}>Weight</Text>
+                <TextInput
+                  style={[styles.textEditThirdWidth]}
+                  keyboardType='numeric'
+                  onEndEditing={() => {
+                    if (this.state.updatedWeight !== null) {
+                      this.props.fusionUser.weight = parseFloat(this.state.updatedWeight);
+                      this.setState({...this.state, updatedWeight: null});
+                      this.updateFusionUser(this.props.fusionUser);
+                      this.updatedProfileNotification();
+                    }
                   }}
-              />
-            </Card.Body>
-          </Card>
+                  onChangeText={(text) => this.setState({...this.state, updatedWeight: text}) }
+                  placeholder='Enter weight'
+                  placeholderTextColor={Colors.spacGold}
+                  value={userWeight}/>
+              </View>
 
-          <MessageBarAlert ref='alert'/>
-        </View>
+              <View style={[styles.textInputParent, {flexDirection: 'column'}]}>
+                <Text style={styles.text}>Age</Text>
+                <TextInput
+                  style={[styles.textEditThirdWidth]}
+                  keyboardType='numeric'
+                  onEndEditing={() => {
+                    if (this.state.updatedAge !== null) {
+                      this.props.fusionUser.age = parseInt(this.state.updatedAge);
+                      this.setState({...this.state, updatedAge: null});
+                      this.updateFusionUser(this.props.fusionUser);
+                      this.updatedProfileNotification();
+                    }
+                  }}
+                  onChangeText={(text) => this.setState({...this.state, updatedAge: text}) }
+                  placeholder='Enter age'
+                  placeholderTextColor={Colors.spacGold}
+                  value={userAge}/>
+              </View>
+            </View>
+
+          </Card.Body>
+        </Card>
+
+        <Card style={styles.card}>
+          <Card.Body>
+            <Text style={styles.title}>Completed Workouts</Text>
+            <ListView
+              dataSource={completedWorkoutsDataSource}
+              style={styles.listView}
+              renderSeparator={(sectionId, rowId) => <View key={rowId} style={styles.separator}/>}
+              renderRow={(workout) => {
+                let day = moment(workout.completedDate).format('dddd');
+                let date = moment(workout.completedDate).format('MMM Do, YYYY');
+                return (
+                  <TouchableHighlight onPress={() => this.openWorkoutDetail(workout)}
+                                      underlayColor='#dddddd'>
+                    <View style={{paddingTop: 7, paddingBottom: 7}}>
+                      <Text style={styles.text} key={workout.id + '_day'}>{date} - {day}</Text>
+                      <Text style={styles.text} key={workout.id + '_name'}>{workout.scheduledWorkout.workout.name}</Text>
+                    </View>
+                  </TouchableHighlight>
+                );
+              }}
+            />
+          </Card.Body>
+        </Card>
+
+        <MessageBarAlert ref='alert'/>
+      </View>
     );
   }
 });

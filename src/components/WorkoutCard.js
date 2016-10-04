@@ -1,9 +1,9 @@
 import React, {PropTypes} from 'react';
 import {
-    Dimensions,
-    StyleSheet,
-    View,
-    Text
+  Dimensions,
+  StyleSheet,
+  View,
+  Text
 } from 'react-native';
 import {Card, Button} from 'react-native-material-design';
 import Colors from '../utils/colors';
@@ -23,41 +23,33 @@ const WorkoutCard = React.createClass({
 
   render() {
     const workout = this.props.workout;
-    let exerciseNameText = WorkoutUtils.getName(workout);
-    let descriptionText = WorkoutUtils.getPreviewText(workout);
+    let workoutName = WorkoutUtils.getWorkoutName(workout);
 
-    let exerciseOptionsText = (
-        WorkoutUtils.getExerciseOptions(workout).map(option => {
-          if (option.targetAmount) { return option.targetAmount; }
-          else if (option.duration) { return option.duration; }
-          else { return 'Unknown'; }
-        }).join(', ')
-    );
+    let exerciseNames = WorkoutUtils.getExercises(workout).map(option => option.amount).join(', ');
 
     let rightButton;
     if (this.props.displayRightButton) {
       rightButton = <Button text={this.props.displayRightButtonText} onPress={this.props.rightButtonAction}/>;
     }
 
-    let dayText = '';
+    let workoutDay = '';
     if (this.props.displayDay) {
-      dayText = WorkoutUtils.getDay(workout);
+      workoutDay = WorkoutUtils.getDay(workout);
     }
 
     return (
-        <View style={styles.container}>
-          <Card style={styles.card}>
-            <Card.Body>
-              <Text style={[styles.text, {textAlign: 'center'}]}>{dayText}</Text>
-              <Text style={styles.workoutTitle}>{exerciseNameText}</Text>
-              <Text style={styles.text}>{descriptionText}</Text>
-              <Text style={styles.text}>Exercise Preview: {exerciseOptionsText}</Text>
-            </Card.Body>
-            <Card.Actions position='right'>
-              {rightButton}
-            </Card.Actions>
-          </Card>
-        </View>
+      <View style={styles.container}>
+        <Card style={styles.card}>
+          <Card.Body>
+            <Text style={[styles.text, {textAlign: 'center'}]}>{workoutDay}</Text>
+            <Text style={styles.workoutTitle}>{workoutName}</Text>
+            <Text style={styles.text}>Exercise Preview: {exerciseNames}</Text>
+          </Card.Body>
+          <Card.Actions position='right'>
+            {rightButton}
+          </Card.Actions>
+        </Card>
+      </View>
     );
   }
 });

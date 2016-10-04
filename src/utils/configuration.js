@@ -3,8 +3,8 @@ import * as env from '../../env';
 
 let baseConfig = {
   USERS_PATH: '/users',
-  EXERCISES_PATH: '/exercises',
-  WORKOUTS_PATH: '/workouts'
+  WORKOUTS_PATH: '/workouts',
+  SCHEDULED_WORKOUTS_PATH: '/scheduled-workouts'
 };
 
 let localConfig = Map({
