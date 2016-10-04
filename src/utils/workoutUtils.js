@@ -6,8 +6,8 @@ export function getWorkoutName(scheduledWorkout) {
 }
 
 export function getWorkoutInstructions(scheduledWorkout) {
-  const exercise = findWorkout(scheduledWorkout);
-  return exercise && exercise.instructions ? exercise.instructions : '';
+  const workout = findWorkout(scheduledWorkout);
+  return workout && workout.instructions ? workout.instructions : '';
 }
 
 export function getExercises(scheduledWorkout) {
@@ -28,5 +28,12 @@ export function getDay(scheduledWorkout) {
 }
 
 function findWorkout(scheduledWorkout) {
-  return scheduledWorkout && scheduledWorkout.workout ? scheduledWorkout.workout : null;
+  if (scheduledWorkout) {
+    if (scheduledWorkout.workout)
+      return scheduledWorkout.workout;
+    else if (scheduledWorkout.scheduledWorkout)
+      return scheduledWorkout.scheduledWorkout.workout;
+    else
+      return null;
+  }
 }

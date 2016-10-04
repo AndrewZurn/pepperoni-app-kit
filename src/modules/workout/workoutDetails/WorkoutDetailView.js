@@ -106,16 +106,7 @@ const WorkoutDetailView = React.createClass({
    * that will be displayed rather than in Input component.
    */
   _getInputComponent(workout) {
-
     let result;
-    if (this.props.completedWorkout) {
-      // return the result of the workout
-      result = this.props.completedWorkout.result;
-      if (!this.props.isStartingWorkout) { // return the 'read-only' mode
-        return <Text style={[styles.text, {color: Colors.spacGold}]}>Result: {result}</Text>;
-      }
-    }
-
     if (workout.workoutType === 'TASK') {
       return (
         <Button
@@ -145,6 +136,14 @@ const WorkoutDetailView = React.createClass({
       } else {
         resultsDisplayFieldName = 'Repetitions';
         resultsDisplayFieldAppender = ' Repetitions';
+      }
+
+      if (this.props.completedWorkout) {
+        // return the result of the workout
+        result = this.props.completedWorkout.result;
+        if (!this.props.isStartingWorkout) { // return the 'read-only' mode
+          return <Text style={styles.resultText}>Result: {result} {resultsDisplayFieldName}</Text>;
+        }
       }
 
       let resultsPlaceholderText = `Enter ${resultsDisplayFieldName}`;
@@ -354,6 +353,14 @@ const styles = StyleSheet.create({
     fontSize: Colors.textSize,
     flexWrap: 'wrap',
     color: Colors.spacCream,
+    fontFamily: Colors.textStyle
+  },
+  resultText: {
+    marginTop: 5,
+    marginBottom: 5,
+    fontSize: Colors.textSize + 1,
+    textAlign: 'center',
+    color: Colors.spacGold,
     fontFamily: Colors.textStyle
   },
   textInput: {
