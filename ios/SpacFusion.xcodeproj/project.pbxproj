@@ -18,8 +18,6 @@
 			<string>PBXFileReference</string>
 			<key>lastKnownFileType</key>
 			<string>text</string>
-			<key>name</key>
-			<string>main.jsbundle</string>
 			<key>path</key>
 			<string>main.jsbundle</string>
 			<key>sourceTree</key>
@@ -341,8 +339,6 @@
 			<key>shellScript</key>
 			<string>export NODE_BINARY=node
 ../node_modules/react-native/packager/react-native-xcode.sh</string>
-			<key>showEnvVarsInLog</key>
-			<string>1</string>
 		</dict>
 		<key>00E356EA1AD99517003FC87E</key>
 		<dict>
@@ -738,6 +734,7 @@
 			<string>2147483647</string>
 			<key>files</key>
 			<array>
+				<string>FB78AA651DA49DDF004A95A0</string>
 				<string>146834051AC3E58100842450</string>
 				<string>00C302E51ABCBA2D00DB3ED1</string>
 				<string>00C302E71ABCBA2D00DB3ED1</string>
@@ -749,6 +746,7 @@
 				<string>00C302EA1ABCBA2D00DB3ED1</string>
 				<string>139FDEF61B0652A700C62182</string>
 				<string>820D823E145114BF9891D2A0</string>
+				<string>85A0F97C75D9FC91E26E7AD9</string>
 			</array>
 			<key>isa</key>
 			<string>PBXFrameworksBuildPhase</string>
@@ -1189,6 +1187,7 @@
 		<dict>
 			<key>children</key>
 			<array>
+				<string>FB78AA551DA49DBC004A95A0</string>
 				<string>146833FF1AC3E56700842450</string>
 				<string>00C302A71ABCB8CE00DB3ED1</string>
 				<string>00C302B51ABCB90400DB3ED1</string>
@@ -1328,6 +1327,12 @@
 			<string></string>
 			<key>projectReferences</key>
 			<array>
+				<dict>
+					<key>ProductGroup</key>
+					<string>FB78AA561DA49DBC004A95A0</string>
+					<key>ProjectRef</key>
+					<string>FB78AA551DA49DBC004A95A0</string>
+				</dict>
 				<dict>
 					<key>ProductGroup</key>
 					<string>00C302A81ABCB8CE00DB3ED1</string>
@@ -1582,6 +1587,13 @@
 			<key>name</key>
 			<string>Release</string>
 		</dict>
+		<key>85A0F97C75D9FC91E26E7AD9</key>
+		<dict>
+			<key>fileRef</key>
+			<string>C31CA6178A4EFA0E02C57B74</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
+		</dict>
 		<key>AE32D353EAEB73468EC0AFAA</key>
 		<dict>
 			<key>buildActionMask</key>
@@ -1601,16 +1613,30 @@
 			<key>shellPath</key>
 			<string>/bin/sh</string>
 			<key>shellScript</key>
-			<string>"${SRCROOT}/Pods/Target Support Files/Pods-SpacFusion/Pods-SpacFusion-frameworks.sh"
+			<string>"${SRCROOT}/Pods/Target Support Files/Pods/Pods-frameworks.sh"
 </string>
 			<key>showEnvVarsInLog</key>
 			<string>0</string>
+		</dict>
+		<key>C31CA6178A4EFA0E02C57B74</key>
+		<dict>
+			<key>explicitFileType</key>
+			<string>archive.ar</string>
+			<key>includeInIndex</key>
+			<string>0</string>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>path</key>
+			<string>libPods.a</string>
+			<key>sourceTree</key>
+			<string>BUILT_PRODUCTS_DIR</string>
 		</dict>
 		<key>C9A2566AF82299F8934CE7FB</key>
 		<dict>
 			<key>children</key>
 			<array>
 				<string>7E6A78E5D163AF0279BFB088</string>
+				<string>C31CA6178A4EFA0E02C57B74</string>
 			</array>
 			<key>isa</key>
 			<string>PBXGroup</string>
@@ -1638,7 +1664,7 @@
 			<key>shellPath</key>
 			<string>/bin/sh</string>
 			<key>shellScript</key>
-			<string>"${SRCROOT}/Pods/Target Support Files/Pods-SpacFusion/Pods-SpacFusion-resources.sh"
+			<string>"${SRCROOT}/Pods/Target Support Files/Pods/Pods-resources.sh"
 </string>
 			<key>showEnvVarsInLog</key>
 			<string>0</string>
@@ -1672,6 +1698,65 @@ fi
 </string>
 			<key>showEnvVarsInLog</key>
 			<string>0</string>
+		</dict>
+		<key>FB78AA551DA49DBC004A95A0</key>
+		<dict>
+			<key>isa</key>
+			<string>PBXFileReference</string>
+			<key>lastKnownFileType</key>
+			<string>wrapper.pb-project</string>
+			<key>name</key>
+			<string>A0RNLock.xcodeproj</string>
+			<key>path</key>
+			<string>../node_modules/react-native-lock/ios/A0RNLock.xcodeproj</string>
+			<key>sourceTree</key>
+			<string>&lt;group&gt;</string>
+		</dict>
+		<key>FB78AA561DA49DBC004A95A0</key>
+		<dict>
+			<key>children</key>
+			<array>
+				<string>FB78AA5A1DA49DBC004A95A0</string>
+			</array>
+			<key>isa</key>
+			<string>PBXGroup</string>
+			<key>name</key>
+			<string>Products</string>
+			<key>sourceTree</key>
+			<string>&lt;group&gt;</string>
+		</dict>
+		<key>FB78AA591DA49DBC004A95A0</key>
+		<dict>
+			<key>containerPortal</key>
+			<string>FB78AA551DA49DBC004A95A0</string>
+			<key>isa</key>
+			<string>PBXContainerItemProxy</string>
+			<key>proxyType</key>
+			<string>2</string>
+			<key>remoteGlobalIDString</key>
+			<string>5F0499EE1CAE9F4A006F6C05</string>
+			<key>remoteInfo</key>
+			<string>A0RNLock</string>
+		</dict>
+		<key>FB78AA5A1DA49DBC004A95A0</key>
+		<dict>
+			<key>fileType</key>
+			<string>archive.ar</string>
+			<key>isa</key>
+			<string>PBXReferenceProxy</string>
+			<key>path</key>
+			<string>libA0RNLock.a</string>
+			<key>remoteRef</key>
+			<string>FB78AA591DA49DBC004A95A0</string>
+			<key>sourceTree</key>
+			<string>BUILT_PRODUCTS_DIR</string>
+		</dict>
+		<key>FB78AA651DA49DDF004A95A0</key>
+		<dict>
+			<key>fileRef</key>
+			<string>FB78AA5A1DA49DBC004A95A0</string>
+			<key>isa</key>
+			<string>PBXBuildFile</string>
 		</dict>
 		<key>FF548A366A95607AC36C1533</key>
 		<dict>

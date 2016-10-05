@@ -11,10 +11,7 @@ const authenticationEnabled = clientId && domain;
 
 function initializeLockComponent() {
   if (authenticationEnabled) {
-    return new Auth0Lock({
-      clientId,
-      domain
-    });
+    return new Auth0Lock({clientId, domain});
   } else {
     console.warn('Authentication not enabled: Auth0 configuration not provided');
     return null;
