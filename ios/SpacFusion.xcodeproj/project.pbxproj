@@ -775,6 +775,7 @@
 					"-ObjC",
 					"-lc++",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.zalude.spac.SpacFusion;
 				PRODUCT_NAME = SpacFusion;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -799,6 +800,7 @@
 					"-ObjC",
 					"-lc++",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.zalude.spac.SpacFusion;
 				PRODUCT_NAME = SpacFusion;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
