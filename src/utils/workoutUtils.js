@@ -27,6 +27,11 @@ export function getDay(scheduledWorkout) {
   return dayText;
 }
 
+export function getWorkoutType(workout) {
+  const foundWorkout = findWorkout(workout);
+  return foundWorkout && foundWorkout.workoutType ? foundWorkout.workoutType : '';
+}
+
 function findWorkout(scheduledWorkout) {
   if (scheduledWorkout) {
     if (scheduledWorkout.workout)

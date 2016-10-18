@@ -41,8 +41,8 @@ const WorkoutDetailView = React.createClass({
       // should be an {exerciseOptionId, isSelected, {exerciseOptionId, isSelected}}
       timedWorkoutBeingEdited: false,
       workoutSubmitted: false,
-      result: null,
-      displayedResult: null,
+      result: null, // { workoutResult, resultsByExercise: [{ exerciseId, weight }] }
+      displayedResult: null, // { workoutResult, resultsByExercise: [{ exerciseId, weight }] }
       workout: null
     };
   },
@@ -83,7 +83,7 @@ const WorkoutDetailView = React.createClass({
     this.props.dispatch(WorkoutState.saveCompletedWorkout(result, userId, workoutId));
   },
 
-  _updateWorkoutResult(value, displayValueAppender, isEndEditing) {
+  _getResultsAndDisplayResult(value, displayValueAppender, isEndEditing) {
     let result;
     let displayedResult;
     if (isEndEditing) { // has exited the input picker/keyboard
@@ -94,7 +94,97 @@ const WorkoutDetailView = React.createClass({
       displayedResult = value;
       result = value;
     }
-    this.setState({...this.state, result, displayedResult});
+    return {result, displayedResult};
+  },
+
+  _updateWorkoutResult(value, displayValueAppender, isEndEditing) {
+    let resultsByExercise = this.state.result.resultsByExercise;
+    let resultForWorkout = this._getResultsAndDisplayResult(value, displayValueAppender, isEndEditing);
+    this.setState({...this.state, result: {resultForWorkout, resultsByExercise}});
+  },
+
+  _updateExerciseResult(value, displayValueAppender, exerciseId, isEndEditing) {
+    let result = this._getResultsAndDisplayResult(value, displayValueAppender, isEndEditing);
+    let resultForWorkout = this.state.result.resultForWorkout;
+    let resultsByExercise = this.state.result.resultsByExercise
+      .map(exercise => {
+        if (exercise.exerciseId === exerciseId) return {exerciseId, ...result};
+        else return exercise;
+      });
+
+    this.setState({...this.state, result: {resultForWorkout, resultsByExercise}});
+  },
+
+  _getExerciseInputComponent(exercise) {
+    if (exercise && exercise.input) {
+      let exerciseId = exercise.id;
+      return (
+        <View style={styles.textInputParent}>
+          <TextInput
+            style={[styles.textInput]}
+            keyboardType='numeric'
+            // different displayValue when done editing to display something like (ie '50 Reps' or '200 lbs')
+            onEndEditing={() => { // done editing, add the appender to use as the displayValue
+              let value = this._getSavedResultValue(this.state.result, exerciseId);
+              this._updateExerciseResult(value, resultsDisplayFieldAppender, exerciseId, true);
+            }}
+            onFocus={() => { // reset the text box to use just the value (and not the displayValue)
+              let value = this._getSavedResultValue(this.state.result, exerciseId);
+              this._updateExerciseResult(value, value, exerciseId, false);
+            }}
+            onChangeText={(text) => this._updateExerciseResult(text, '', exerciseId, false) }
+            placeholder='Enter Results'
+            placeholderTextColor={Colors.spacGold}
+            value={this.state.displayedResult}/>
+        </View>
+      );
+    } else {
+      return null;
+    }
+  },
+
+  _getTimedBasedComponent(workout) {
+    return (
+      <Button
+        text={this._getTimedButtonText()}
+        raised={true}
+        overrides={{
+          textColor: Colors.defaultButtonColor,
+          backgroundColor: Colors.spacMediumGray,
+          rippleColor: Colors.spacLightGray
+        }}
+        onPress={() => {
+          if (workout.workoutType === 'TASK' && this.picker) {
+            this.picker.toggle();
+            this.setState({...this.state, timedWorkoutBeingEdited: true});
+          }
+        }}
+      />
+    );
+  },
+
+  _getNumericBasedInputComponent(workout) {
+    return (
+      <View>
+        <TextInput
+          style={[styles.textInput, {marginRight: 5, marginLeft: 5}]}
+          keyboardType='numeric'
+          // different displayValue when done editing to display something like (ie '50 Reps' or '200 lbs')
+          onEndEditing={() => { // done editing, add the appender to use as the displayValue
+            let value = this._getSavedResultValue(this.state.result, null);
+            this._updateWorkoutResult(value, workout.input, true);
+          }}
+          onFocus={() => { // reset the text box to use just the value (and not the displayValue)
+            let value = this._getSavedResultValue(this.state.result, null);
+            this._updateWorkoutResult(value, workout.input, true);
+          }}
+          onChangeText={(text) => this._updateWorkoutResult(text, '', false, null) }
+          placeholder='Enter Results'
+          placeholderTextColor={Colors.spacGold}
+          value={this.state.displayedResult}
+        />
+      </View>
+    );
   },
 
   /**
@@ -105,82 +195,42 @@ const WorkoutDetailView = React.createClass({
    * If the view is in 'read-only' (!this.props.isStartinWorkout) mode, it will return a label
    * that will be displayed rather than in Input component.
    */
-  _getInputComponent(workout) {
+  _getWorkoutInputComponent(workout) {
     let result;
-    if (workout.workoutType === 'TASK') {
-      return (
-        <Button
-          text={this._getTimedButtonText()}
-          raised={true}
-          overrides={{
-            textColor: Colors.defaultButtonColor,
-            backgroundColor: Colors.spacMediumGray,
-            rippleColor: Colors.spacLightGray
-          }}
-          onPress={() => {
-            if (workout.workoutType === 'TASK' && this.picker) {
-              this.picker.toggle();
-              this.setState({...this.state, timedWorkoutBeingEdited: true});
-            }
-          }}
-        />
-      );
-    } else if (workout.workoutType === 'NA') {
-      return null;
-    } else { // numeric
-      let resultsDisplayFieldName;
-      let resultsDisplayFieldAppender; // should be applied to the value of the field when entered/present (and not being edited)
-      if (workout.workoutType === 'HEAVY') {
-        resultsDisplayFieldName = ' Weight';
-        resultsDisplayFieldAppender = 'lbs';
+    if (workout && workout.input) {
+      if (workout.workoutType === 'TASK') {
+        return this._getTimedBasedComponent(workout);
       } else {
-        resultsDisplayFieldName = 'Repetitions';
-        resultsDisplayFieldAppender = ' Repetitions';
-      }
-
-      if (this.props.completedWorkout) {
-        // return the result of the workout
-        result = this.props.completedWorkout.result;
-        if (!this.props.isStartingWorkout) { // return the 'read-only' mode
-          return <Text style={styles.resultText}>Result: {result} {resultsDisplayFieldName}</Text>;
+        if (this.props.completedWorkout) {
+          // return the result of the workout
+          result = this.props.completedWorkout.result;
+          if (!this.props.isStartingWorkout) { // return the 'read-only' mode
+            return <Text style={styles.resultText}>Result: {result} {resultsDisplayFieldName}</Text>;
+          }
         }
-      }
 
-      let resultsPlaceholderText = `Enter ${resultsDisplayFieldName}`;
-      if (this.props.completedWorkout && !this.state.displayedResult) {
-        this.setState({...this.state, result, displayedResult: `${result} ${resultsDisplayFieldName}`});
-      }
+        if (this.props.completedWorkout && !this.state.displayedResult) {
+          this.setState({...this.state, result, displayedResult: `${result} ${workout.input}`});
+        }
 
-      return (
-        <View>
-          <TextInput
-            style={[styles.textInput, {marginRight: 5, marginLeft: 5}]}
-            keyboardType='numeric'
-            // different displayValue when done editing to display something like (ie '50 Reps' or '200 lbs')
-            onEndEditing={() => { // done editing, add the appender to use as the displayValue
-              let value = this._getParsedResultValue(this.state.result);
-              this._updateWorkoutResult(value, resultsDisplayFieldAppender, true);
-            }}
-            onFocus={() => { // reset the text box to use just the value (and not the displayValue)
-              let value = this._getParsedResultValue(this.state.result);
-              this._updateWorkoutResult(value, value, false);
-            }}
-            onChangeText={(text) => this._updateWorkoutResult(text, '', false) }
-            placeholder={resultsPlaceholderText}
-            placeholderTextColor={Colors.spacGold}
-            value={this.state.displayedResult}/>
-        </View>
-      );
+        return this._getNumericBasedInputComponent(workout);
+      }
+    } else {
+      return null;
     }
   },
 
-  _getParsedResultValue(result) {
-    if (result && result.length > 0) {
-      let value = result.split(' ')[0];
-      return value;
+  _getSavedResultValue(result, exerciseId) {
+    let foundResult;
+    if (exerciseId) {
+      foundResult =  result.resultsByExercise
+        .find(exercise => exercise.exerciseId === exerciseId)
+        .result
     } else {
-      return '';
+      foundResult = result.resultForWorkout;
     }
+
+    return foundResult && foundResult.length > 0 ? result.split(' ')[0] : '';
   },
 
   render() {
@@ -192,12 +242,17 @@ const WorkoutDetailView = React.createClass({
     let duration = WorkoutUtils.getDuration(workout);
     let durationText = duration ? <Text style={styles.text}>Duration: {duration}</Text> : null;
     let instructions = WorkoutUtils.getWorkoutInstructions(workout);
+
+    let workoutType = WorkoutUtils.getWorkoutType(workout);
+    let workoutTypeText = workoutType && workoutType.length > 0 ?
+      <Text style={styles.text}>Workout Type: {workoutType}</Text> : null;
     let instructionsText = instructions && instructions.length > 0 ?
       <Text style={styles.text}>Instructions: {instructions}</Text> : null;
 
     // create views for the selected options
     let exerciseCards = WorkoutUtils.getExercises(workout).map(exercise => {
       let exerciseId = exercise.id;
+      let exerciseInput = this._getExerciseInputComponent(exercise);
 
       return (
         <Card style={styles.card} key={'card_' + exerciseId}>
@@ -205,7 +260,7 @@ const WorkoutDetailView = React.createClass({
             <View>
               <Text style={styles.workoutTitle} key={'name_' + exerciseId}>{exercise.name}</Text>
               <Text style={styles.text} key={'amt_' + exerciseId}>{exercise.amount}</Text>
-              {/*{alternativeOptionView}*/}
+              {exerciseInput}
             </View>
           </Card.Body>
         </Card>
@@ -238,6 +293,7 @@ const WorkoutDetailView = React.createClass({
       <View style={styles.container}>
         <Card style={styles.card}>
           <Card.Body>
+            {workoutTypeText}
             {durationText}
             {instructionsText}
           </Card.Body>
@@ -247,7 +303,7 @@ const WorkoutDetailView = React.createClass({
                     style={styles.scrollView}>
           {exerciseCards}
         </ScrollView>
-        {this._getInputComponent(localWorkout)}
+        {this._getWorkoutInputComponent(localWorkout)}
         {completedWorkoutButton}
 
         {/* // picker for timed based results (displays minutes and seconds)*/}
