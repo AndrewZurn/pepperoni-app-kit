@@ -218,8 +218,9 @@ const ProfileView = React.createClass({
               style={styles.listView}
               renderSeparator={(sectionId, rowId) => <View key={rowId} style={styles.separator}/>}
               renderRow={(workout) => {
-                let day = moment(workout.completedDate).format('dddd');
-                let date = moment(workout.completedDate).format('MMM Do, YYYY');
+                let workoutDate = workout.scheduledWorkout.workoutDate;
+                let day = moment(workoutDate).format('dddd');
+                let date = moment(workoutDate).format('MMM Do, YYYY');
                 return (
                   <TouchableHighlight onPress={() => this.openWorkoutDetail(workout)}
                                       underlayColor='#dddddd'>

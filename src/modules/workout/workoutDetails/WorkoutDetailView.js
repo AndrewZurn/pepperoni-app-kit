@@ -229,14 +229,15 @@ const WorkoutDetailView = React.createClass({
       } else {
         if (this.props.completedWorkout) {
           // return the result of the workout
-          result = this.props.completedWorkout.result;
+          result = this.props.completedWorkout.result.resultForWorkout;
           if (!this.props.isStartingWorkout) { // return the 'read-only' mode
-            return <Text style={styles.resultText}>Result: {result} {resultsDisplayFieldName}</Text>;
+            return <Text style={styles.resultText}>Result: {result.displayedResult}</Text>;
           }
         }
 
-        if (this.props.completedWorkout && !this.state.displayedResult) {
-          this.setState({...this.state, result, displayedResult: `${result} ${workout.input}`});
+        if (this.props.completedWorkout && !this.state.result) {
+          result = this.props.completedWorkout.result;
+          this.setState({...this.state, result});
         }
 
         return this._getNumericBasedInputComponent(workout);
