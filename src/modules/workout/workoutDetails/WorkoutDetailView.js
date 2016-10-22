@@ -41,7 +41,7 @@ const WorkoutDetailView = React.createClass({
       // should be an {exerciseOptionId, isSelected, {exerciseOptionId, isSelected}}
       timedWorkoutBeingEdited: false,
       workoutSubmitted: false,
-      result: null, // { workoutResult, resultsByExercise: [{ exerciseId, weight }] }
+      result: { workoutResult: null, resultsByExercise: [] },
       displayedResult: null, // { workoutResult, resultsByExercise: [{ exerciseId, weight }] }
       workout: null
     };
@@ -49,7 +49,7 @@ const WorkoutDetailView = React.createClass({
 
   componentWillMount() {
     let workout = this.props.isStartingWorkout ? this.props.workouts[0] : this.props.completedWorkout;
-    let result = this.props.isStartingWorkout ? workout.result : null; // Get the result of the workout.
+    let result = !this.props.isStartingWorkout ? workout.result : null; // Get the result of the workout.
     this.setState({...this.state, workout, result});
   },
 
@@ -87,30 +87,39 @@ const WorkoutDetailView = React.createClass({
     let result;
     let displayedResult;
     if (isEndEditing) { // has exited the input picker/keyboard
-      displayedResult = `${value}${displayValueAppender}`;
-      result = value;
+      displayedResult = `${value.result} ${displayValueAppender}`;
+      result = value.result;
     }
     else { // still in input, so keep only the non-appended results displayed
-      displayedResult = value;
-      result = value;
+      displayedResult = value.result;
+      result = displayedResult;
     }
     return {result, displayedResult};
   },
 
   _updateWorkoutResult(value, displayValueAppender, isEndEditing) {
-    let resultsByExercise = this.state.result.resultsByExercise;
-    let resultForWorkout = this._getResultsAndDisplayResult(value, displayValueAppender, isEndEditing);
-    this.setState({...this.state, result: {resultForWorkout, resultsByExercise}});
+    if (value) {
+      let resultsByExercise = this.state.result && this.state.result.resultsByExercise ? this.state.result.resultsByExercise : null;
+      let resultForWorkout = this._getResultsAndDisplayResult(value, displayValueAppender, isEndEditing);
+      this.setState({...this.state, result: {resultForWorkout, resultsByExercise}});
+    }
   },
 
-  _updateExerciseResult(value, displayValueAppender, exerciseId, isEndEditing) {
-    let result = this._getResultsAndDisplayResult(value, displayValueAppender, isEndEditing);
-    let resultForWorkout = this.state.result.resultForWorkout;
-    let resultsByExercise = this.state.result.resultsByExercise
-      .map(exercise => {
-        if (exercise.exerciseId === exerciseId) return {exerciseId, ...result};
-        else return exercise;
-      });
+  _updateExerciseResult(value, exerciseId) {
+    let resultForWorkout = this.state.result ? this.state.result.resultForWorkout : null;
+    let resultsByExercise;
+    if (this.state.result && this.state.result.resultsByExercise) {
+      if (this.state.result.resultsByExercise.find(e => e.exerciseId === exerciseId)) { // if it already exists find it an update it
+        resultsByExercise = this.state.result.resultsByExercise.map(exercise => {
+          if (exercise.exerciseId === exerciseId) return {exerciseId, ...value};
+          else return exercise;
+        });
+      } else { // else add it
+        resultsByExercise = this.state.result.resultsByExercise.concat([{exerciseId, ...value}]);
+      }
+    } else { // if not initialized, add a new array
+      resultsByExercise = [{exerciseId, ...value}];
+    }
 
     this.setState({...this.state, result: {resultForWorkout, resultsByExercise}});
   },
@@ -118,6 +127,10 @@ const WorkoutDetailView = React.createClass({
   _getExerciseInputComponent(exercise) {
     if (exercise && exercise.input) {
       let exerciseId = exercise.id;
+      let resultsDisplayFieldAppender = exercise.input ? exercise.input : '';
+      let placeholderText = resultsDisplayFieldAppender.length > 0 ? resultsDisplayFieldAppender : 'Results';
+      let result = this._getSavedResultValue(this.state.result, exerciseId);
+      let resultToDisplay = result ? result.displayedResult : null;
       return (
         <View style={styles.textInputParent}>
           <TextInput
@@ -126,16 +139,23 @@ const WorkoutDetailView = React.createClass({
             // different displayValue when done editing to display something like (ie '50 Reps' or '200 lbs')
             onEndEditing={() => { // done editing, add the appender to use as the displayValue
               let value = this._getSavedResultValue(this.state.result, exerciseId);
-              this._updateExerciseResult(value, resultsDisplayFieldAppender, exerciseId, true);
+              let updatedValue = {result: value.result, displayedResult: `${value.result} ${resultsDisplayFieldAppender}`};
+              this._updateExerciseResult(updatedValue, exerciseId);
             }}
             onFocus={() => { // reset the text box to use just the value (and not the displayValue)
               let value = this._getSavedResultValue(this.state.result, exerciseId);
-              this._updateExerciseResult(value, value, exerciseId, false);
+              let result = value && value.result ? value.result : '';
+              let updatedValue = {result, displayedResult: result};
+              this._updateExerciseResult(updatedValue, exerciseId);
             }}
-            onChangeText={(text) => this._updateExerciseResult(text, '', exerciseId, false) }
-            placeholder='Enter Results'
+            onChangeText={(text) => {
+              let value = {result: text, displayedResult: text};
+              this._updateExerciseResult(value, exerciseId)
+            }}
+            placeholder={`Enter ${placeholderText}`}
             placeholderTextColor={Colors.spacGold}
-            value={this.state.displayedResult}/>
+            value={resultToDisplay}
+          />
         </View>
       );
     } else {
@@ -143,10 +163,40 @@ const WorkoutDetailView = React.createClass({
     }
   },
 
+  _getNumericBasedInputComponent(workout) {
+    let resultAppender = workout.input ? `Enter ${workout.input}` : 'Enter Results';
+    return (
+      <View>
+        <TextInput
+          style={[styles.textInput, {marginRight: 8, marginLeft: 8, marginTop: 7}]}
+          keyboardType='numeric'
+          // different displayValue when done editing to display something like (ie '50 Reps' or '200 lbs')
+          onEndEditing={() => { // done editing, add the appender to use as the displayValue
+            let value = this._getSavedResultValue(this.state.result, null);
+            this._updateWorkoutResult(value, workout.input, true);
+          }}
+          onFocus={() => { // reset the text box to use just the value (and not the displayValue)
+            let value = this._getSavedResultValue(this.state.result, null);
+            let result = value && value.result ? value.result : '';
+            let updatedValue = {result, displayedResult: result};
+            this._updateWorkoutResult(updatedValue, workout.input, false);
+          }}
+          onChangeText={(text) => {
+            let value = {result: text, displayedResult: text};
+            this._updateWorkoutResult(value, '', false)
+          }}
+          placeholder={resultAppender}
+          placeholderTextColor={Colors.spacGold}
+          value={this._getDisplayedResult(null)}
+        />
+      </View>
+    );
+  },
+
   _getTimedBasedComponent(workout) {
     return (
       <Button
-        text={this._getTimedButtonText()}
+        text={this._getDisplayedResult('Enter Timed Result')}
         raised={true}
         overrides={{
           textColor: Colors.defaultButtonColor,
@@ -160,30 +210,6 @@ const WorkoutDetailView = React.createClass({
           }
         }}
       />
-    );
-  },
-
-  _getNumericBasedInputComponent(workout) {
-    return (
-      <View>
-        <TextInput
-          style={[styles.textInput, {marginRight: 5, marginLeft: 5}]}
-          keyboardType='numeric'
-          // different displayValue when done editing to display something like (ie '50 Reps' or '200 lbs')
-          onEndEditing={() => { // done editing, add the appender to use as the displayValue
-            let value = this._getSavedResultValue(this.state.result, null);
-            this._updateWorkoutResult(value, workout.input, true);
-          }}
-          onFocus={() => { // reset the text box to use just the value (and not the displayValue)
-            let value = this._getSavedResultValue(this.state.result, null);
-            this._updateWorkoutResult(value, workout.input, true);
-          }}
-          onChangeText={(text) => this._updateWorkoutResult(text, '', false, null) }
-          placeholder='Enter Results'
-          placeholderTextColor={Colors.spacGold}
-          value={this.state.displayedResult}
-        />
-      </View>
     );
   },
 
@@ -222,15 +248,17 @@ const WorkoutDetailView = React.createClass({
 
   _getSavedResultValue(result, exerciseId) {
     let foundResult;
-    if (exerciseId) {
-      foundResult =  result.resultsByExercise
-        .find(exercise => exercise.exerciseId === exerciseId)
-        .result
-    } else {
-      foundResult = result.resultForWorkout;
+    if (result) {
+      if (exerciseId) {
+        if (result.resultsByExercise && result.resultsByExercise.length > 0) {
+          foundResult = result.resultsByExercise.find(exercise => exercise.exerciseId === exerciseId)
+        }
+      } else {
+        foundResult = result.resultForWorkout;
+      }
     }
 
-    return foundResult && foundResult.length > 0 ? result.split(' ')[0] : '';
+    return foundResult;
   },
 
   render() {
@@ -271,7 +299,7 @@ const WorkoutDetailView = React.createClass({
     let completedWorkoutButton;
     if (this.props.isStartingWorkout) {
       completedWorkoutButton = (
-        <View style={{marginTop: 4, marginBottom: 4}}>
+        <View style={{marginTop: 4, marginBottom: 4, marginLeft: 2, marginRight: 2}}>
           <Button
             text='Complete Workout'
             raised={true}
@@ -333,7 +361,7 @@ const WorkoutDetailView = React.createClass({
   },
 
   _submitCompletedWorkout() {
-    if (this.state.result === null || this.state.result.length < 0) {
+    if (this.state.result === null || this.state.result.length < 0) { // TODO: check to make sure exercises with inputs matches the length of exercises results
       Alert.alert(
         'Cannot Submit Incomplete Workout',
         `Please enter your results for this workout.`,
@@ -360,8 +388,11 @@ const WorkoutDetailView = React.createClass({
     return `${minutes} ${seconds}`;
   },
 
-  _getTimedButtonText() {
-    return this.state.displayedResult ? this.state.displayedResult : 'Enter Timed Results';
+  _getDisplayedResult(defaultResult) {
+    return this.state.result
+      && this.state.result.resultForWorkout
+      && this.state.result.resultForWorkout.displayedResult
+      ? this.state.result.resultForWorkout.displayedResult : defaultResult;
   },
 
   _getMinutesArray() {

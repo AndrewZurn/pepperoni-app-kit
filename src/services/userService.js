@@ -56,7 +56,6 @@ export async function updateUser(user) {
 }
 
 export async function saveCompletedWorkout(result, userId, workoutId) {
-  debugger;
   return api.post(
       COMPLETED_WORKOUTS_PATH(userId, workoutId),
       {result},
