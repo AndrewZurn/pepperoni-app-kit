@@ -22,6 +22,8 @@ var MessageBarManager = require('react-native-message-bar').MessageBarManager;
 
 const width = Dimensions.get('window').width;
 var page = 0;
+var datasource = null;
+var table = null;
 
 /**
  * Sample view to demonstrate navigation patterns.
@@ -121,6 +123,46 @@ const ProfileView = React.createClass({
       viewTopOffset: -300
     });
   },
+  _hasWorkoutData() {
+    return this.props.completedWorkouts && this.props.completedWorkouts.length > 0;
+  },
+  _getCompletedWorkoutDataSource() {
+    if (this._hasWorkoutData() && !datasource) {
+      datasource = new ListView.DataSource({rowHasChanged: (r1, r2) => r1.id !== r2.id})
+        .cloneWithRows(this.props.completedWorkouts);
+    }
+    return datasource;
+  },
+  _getCompletedWorkoutTable() {
+    if (!table && this._hasWorkoutData()) {
+      table = (<Card style={styles.card}>
+        <Card.Body>
+          <Text style={styles.title}>Completed Workouts</Text>
+          <ListView
+            dataSource={this._getCompletedWorkoutDataSource()}
+            style={styles.listView}
+            renderSeparator={(sectionId, rowId) => <View key={rowId} style={styles.separator}/>}
+            renderRow={(workout) => {
+              let workoutDate = workout.scheduledWorkout.workoutDate;
+              let day = moment(workoutDate).format('dddd');
+              let date = moment(workoutDate).format('MMM Do, YYYY');
+              return (
+                <TouchableHighlight onPress={() => this.openWorkoutDetail(workout)}
+                                    underlayColor='#dddddd'>
+                  <View style={{paddingTop: 7, paddingBottom: 7}}>
+                    <Text style={styles.text} key={workout.id + '_day'}>{date} - {day}</Text>
+                    <Text style={styles.text}
+                          key={workout.id + '_name'}>{workout.scheduledWorkout.workout.name}</Text>
+                  </View>
+                </TouchableHighlight>
+              );
+            }}
+          />
+        </Card.Body>
+      </Card>);
+    }
+    return table;
+  },
 
   render() {
     let userName = this._getFusionUserName();
@@ -131,12 +173,6 @@ const ProfileView = React.createClass({
     let userFusionLevel = this._getFusionUserLevel();
 
     this._getFusionUserCompletedWorkouts();
-
-    let completedWorkoutsDataSource = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
-    if (this.props.completedWorkouts && this.props.completedWorkouts.length > 0) {
-      completedWorkoutsDataSource = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2})
-        .cloneWithRows(this.props.completedWorkouts);
-    }
 
     return (
       <View style={styles.container}>
@@ -210,30 +246,7 @@ const ProfileView = React.createClass({
           </Card.Body>
         </Card>
 
-        <Card style={styles.card}>
-          <Card.Body>
-            <Text style={styles.title}>Completed Workouts</Text>
-            <ListView
-              dataSource={completedWorkoutsDataSource}
-              style={styles.listView}
-              renderSeparator={(sectionId, rowId) => <View key={rowId} style={styles.separator}/>}
-              renderRow={(workout) => {
-                let workoutDate = workout.scheduledWorkout.workoutDate;
-                let day = moment(workoutDate).format('dddd');
-                let date = moment(workoutDate).format('MMM Do, YYYY');
-                return (
-                  <TouchableHighlight onPress={() => this.openWorkoutDetail(workout)}
-                                      underlayColor='#dddddd'>
-                    <View style={{paddingTop: 7, paddingBottom: 7}}>
-                      <Text style={styles.text} key={workout.id + '_day'}>{date} - {day}</Text>
-                      <Text style={styles.text} key={workout.id + '_name'}>{workout.scheduledWorkout.workout.name}</Text>
-                    </View>
-                  </TouchableHighlight>
-                );
-              }}
-            />
-          </Card.Body>
-        </Card>
+        {this._getCompletedWorkoutTable()}
 
         <MessageBarAlert ref='alert'/>
       </View>
