@@ -1,10 +1,11 @@
 import * as api from '../utils/api';
 import * as configuration from '../utils/configuration';
+import moment from 'moment';
 
 const API_FAILED_REQUEST_WARNING = configuration.getConfiguration('API_FAILED_REQUEST_WARNING_MESSAGE');
 const WORKOUTS_BASE_PATH = configuration.getConfiguration('SCHEDULED_WORKOUTS_PATH');
-const GET_WORKOUT_BY_ID_PATH = workoutId => { return WORKOUTS_BASE_PATH + `/${workoutId}`; };
-const GET_TODAYS_WORKOUT_PATH = WORKOUTS_BASE_PATH + '/today';
+const GET_WORKOUT_BY_ID_PATH = workoutId => WORKOUTS_BASE_PATH + `/${workoutId}`;
+const GET_TODAYS_WORKOUT_PATH = date => WORKOUTS_BASE_PATH + `/by-date/${date}`;
 const GET_WEEKS_REMAINING_WORKOUTS_PATH = WORKOUTS_BASE_PATH + '/week';
 
 export async function getWorkouts() {
@@ -14,7 +15,9 @@ export async function getWorkouts() {
 }
 
 export async function getTodaysWorkout() {
-  return api.get(GET_TODAYS_WORKOUT_PATH, API_FAILED_REQUEST_WARNING)
+  let todaysDate = moment().format('YYYY-MM-DD');
+  console.log('Date for today is: ' + todaysDate);
+  return api.get(GET_TODAYS_WORKOUT_PATH(todaysDate), API_FAILED_REQUEST_WARNING)
       .then(response => response.body)
       .catch(error => console.error(`Error during getTodaysWorkouts. Error: ${error}`));
 }

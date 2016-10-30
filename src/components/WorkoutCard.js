@@ -16,7 +16,7 @@ const WorkoutCard = React.createClass({
   propTypes: {
     workout: PropTypes.object.isRequired,
     displayDay: PropTypes.bool.isRequired,
-    displayRightButton: PropTypes.bool.isRequired,
+    displayRightButton: PropTypes.bool,
     displayRightButtonText: PropTypes.string,
     rightButtonAction: PropTypes.func
   },

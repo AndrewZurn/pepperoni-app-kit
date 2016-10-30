@@ -18,7 +18,7 @@ import Immutable from 'immutable';
 const WorkoutView = React.createClass({
   propTypes: {
     workouts: PropTypes.array.isRequired,
-    remainingWorkoutUnlocks: PropTypes.number.isRequired,
+    remainingWorkoutUnlocks: PropTypes.number,
     fusionUser: PropTypes.object.isRequired,
     completedWorkout: PropTypes.object,
     didSaveCompletedWorkout: PropTypes.bool.isRequired,
