@@ -10,6 +10,9 @@ const USER_BY_AUTH0_ID_PATH = auth0UserId => USERS_BASE_PATH + `/auth0/${auth0Us
 const GET_COMPLETED_WORKOUTS_PATH = (fusionUserId, page) => {
   return USER_BY_ID_PATH(fusionUserId) + `${SCHEDULED_WORKOUT_BASE_PATH}?page=${page}&pageSize=150`;
 };
+const COMPLETED_WORKOUT_BY_DATE_PATH = (fusionUserId, workoutDate) => {
+  return USER_BY_ID_PATH(fusionUserId) + `${SCHEDULED_WORKOUT_BASE_PATH}/${workoutDate}`;
+};
 const COMPLETED_WORKOUTS_PATH = (fusionUserId, workoutId) => {
   return USER_BY_ID_PATH(fusionUserId) + `${SCHEDULED_WORKOUT_BASE_PATH}/${workoutId}`;
 };
@@ -38,8 +41,8 @@ export async function getCompletedWorkouts(fusionUserId, page) {
       .catch(error => console.error(`Error during getCompletedWorkouts. Error: ${error}`));
 }
 
-export async function getCompletedWorkout(fusionUserId, workoutId) {
-  return api.get(COMPLETED_WORKOUTS_PATH(fusionUserId, workoutId), API_FAILED_REQUEST_WARNING)
+export async function getCompletedWorkout(fusionUserId, workoutDate) {
+  return api.get(COMPLETED_WORKOUT_BY_DATE_PATH(fusionUserId, workoutDate), API_FAILED_REQUEST_WARNING)
       .then(response => {
         if (response.status === 200) {
           return {completedWorkout: response.body};

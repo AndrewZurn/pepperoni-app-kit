@@ -12,6 +12,8 @@ import * as WorkoutState from './WorkoutState';
 import * as WorkoutUtils from '../../utils/workoutUtils';
 import Immutable from 'immutable';
 
+var hasLoadedCompletedWorkout = false;
+
 /**
  * @TODO remove this module in a live application.
  */
@@ -21,13 +23,16 @@ const WorkoutView = React.createClass({
     remainingWorkoutUnlocks: PropTypes.number,
     fusionUser: PropTypes.object.isRequired,
     completedWorkout: PropTypes.object,
-    didSaveCompletedWorkout: PropTypes.bool.isRequired,
     error: PropTypes.object,
     isInView: PropTypes.bool.isRequired,
     dispatch: PropTypes.func.isRequired
   },
   getInitialState() {
     return {currentDisplayedErrors: []};
+  },
+  componentWillUnmount() {
+    hasLoadedCompletedWorkout = false;
+    this.setState(this.getInitialState());
   },
   _handlerStateErrors() {
     if (this.props.isInView &&
@@ -55,10 +60,18 @@ const WorkoutView = React.createClass({
       this.setState({...this.state, currentDisplayedErrors: displayErrors.push(message)});
     }
   },
-  _getTodaysWorkout() {
-    if (this.props.fusionUser) {
-      // should set today's workout as head of 'workouts'
-      this.props.dispatch(WorkoutState.getTodaysWorkout(this.props.fusionUser.id));
+  _getWorkout() {
+    // if there is already a completed workout get it by id, otherwise get today's date
+    // NOTE: issue in how this is loaded, as if we don't do the check first and then update
+    // on the first if condition, it gets into an infinite loop while in the detail view.
+    if (this.props.fusionUser && !hasLoadedCompletedWorkout) {
+      if (this.props.completedWorkout
+        && this.props.completedWorkout.scheduledWorkout) {
+        hasLoadedCompletedWorkout = true;
+        this.props.dispatch(WorkoutState.getWorkout(this.props.completedWorkout.scheduledWorkout.id));
+      } else {
+        this.props.dispatch(WorkoutState.getTodaysWorkout(this.props.fusionUser.id));
+      }
     }
   },
   _getRemainingWorkoutUnlocks() {
@@ -67,7 +80,7 @@ const WorkoutView = React.createClass({
     }
   },
   setupForWorkout() {
-    this._getTodaysWorkout();
+    this._getWorkout();
     this._getRemainingWorkoutUnlocks();
   },
   openWorkoutDetail() {
@@ -83,6 +96,7 @@ const WorkoutView = React.createClass({
     let unlockWorkoutButtonText = 'Start Workout';
     if (this.props.completedWorkout) {
       unlockWorkoutButtonText = 'Edit Completed Workout';
+      this._getWorkout();
     }
 
     let workoutCard;

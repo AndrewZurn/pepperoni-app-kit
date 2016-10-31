@@ -115,10 +115,10 @@ export async function requestGetTodaysWorkout(userId) {
   };
 }
 
-export async function requestGetCompletedWorkout(userId, workoutId) {
+export async function requestGetCompletedWorkout(userId, workoutDate) {
   return {
     type: GET_COMPLETED_WORKOUT_RESPONSE,
-    payload: await UserService.getCompletedWorkout(userId, workoutId),
+    payload: await UserService.getCompletedWorkout(userId, workoutDate),
     receivedAt: Date.now()
   };
 }
@@ -211,9 +211,10 @@ export default function WorkoutStateReducer(state = initialState, action = {}) {
 
     case GET_TODAYS_WORKOUT_RESPONSE:
       if (action.payload && action.payload.id) {
+        debugger;
         return loop(
           state.set('workouts', [action.payload]),
-          Effects.promise(requestGetCompletedWorkout, action.userId, action.payload.id)
+          Effects.promise(requestGetCompletedWorkout, action.userId, action.payload.workoutDate)
         );
       } else {
         return state
