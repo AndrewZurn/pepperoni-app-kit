@@ -131,6 +131,11 @@ const WorkoutDetailView = React.createClass({
       let placeholderText = resultsDisplayFieldAppender.length > 0 ? resultsDisplayFieldAppender : 'Results';
       let result = this._getSavedResultValue(this.state.result, exerciseId);
       let resultToDisplay = result ? result.displayedResult : null;
+
+      if (!this.props.isStartingWorkout) { // return the 'read-only' mode
+        return <Text style={styles.resultText}>Result: {resultToDisplay}</Text>;
+      }
+
       return (
         <View style={styles.textInputParent}>
           <TextInput

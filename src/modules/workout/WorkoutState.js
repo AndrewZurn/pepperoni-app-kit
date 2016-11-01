@@ -211,7 +211,6 @@ export default function WorkoutStateReducer(state = initialState, action = {}) {
 
     case GET_TODAYS_WORKOUT_RESPONSE:
       if (action.payload && action.payload.id) {
-        debugger;
         return loop(
           state.set('workouts', [action.payload]),
           Effects.promise(requestGetCompletedWorkout, action.userId, action.payload.workoutDate)
