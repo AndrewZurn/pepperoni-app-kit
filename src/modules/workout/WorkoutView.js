@@ -6,6 +6,7 @@ import {
   Text
 } from 'react-native';
 import Colors from '../../utils/colors';
+const loaderHandler = require('react-native-busy-indicator/LoaderHandler');
 import * as NavigationState from '../../modules/navigation/NavigationState';
 import WorkoutCard from '../../components/WorkoutCard';
 import * as WorkoutState from './WorkoutState';
@@ -19,6 +20,7 @@ var hasLoadedCompletedWorkout = false;
  */
 const WorkoutView = React.createClass({
   propTypes: {
+    loading: PropTypes.bool.isRequired,
     workouts: PropTypes.array.isRequired,
     remainingWorkoutUnlocks: PropTypes.number,
     fusionUser: PropTypes.object.isRequired,
@@ -33,6 +35,13 @@ const WorkoutView = React.createClass({
   componentWillUnmount() {
     hasLoadedCompletedWorkout = false;
     this.setState(this.getInitialState());
+  },
+  _displayLoadingIndicatorWhenLoading() {
+    if (this.props.loading) {
+      loaderHandler.showLoader('Loading');
+    } else {
+      loaderHandler.hideLoader();
+    }
   },
   _handlerStateErrors() {
     if (this.props.isInView &&
@@ -90,6 +99,7 @@ const WorkoutView = React.createClass({
   },
 
   render() {
+    this._displayLoadingIndicatorWhenLoading();
     this._handlerStateErrors();
 
     let canUnlockWorkout = this.props.remainingWorkoutUnlocks > 0 || this.props.completedWorkout;

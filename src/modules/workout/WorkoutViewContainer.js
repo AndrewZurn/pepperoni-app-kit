@@ -4,6 +4,7 @@ import {isInView, WORKOUT_INDEX} from '../AppRouter';
 
 export default connect(
     state => ({
+      loading: state.getIn(['workoutState', 'loading']),
       completedWorkout: state.getIn(['workoutState', 'completedWorkout']),
       didSaveCompletedWorkout: state.getIn(['workoutState', 'didSaveCompletedWorkout']),
       error: state.getIn(['workoutState', 'error']),

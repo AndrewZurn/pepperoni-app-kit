@@ -44,6 +44,7 @@
     "react-native-radio-button": "^1.0.2",
     "react-native-vector-icons": "^2.1.0",
     "react-redux": "^4.4.5",
+    "react-timer-mixin": "^0.13.3",
     "redux": "^3.4.0",
     "redux-logger": "^2.6.1",
     "redux-loop": "^2.1.0",
