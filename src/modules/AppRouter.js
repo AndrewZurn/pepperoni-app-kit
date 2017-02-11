@@ -2,15 +2,9 @@
 
 import React from 'react';
 import HomeViewContainer from './home/HomeViewContainer';
-import WorkoutViewContainer from './workout/WorkoutViewContainer';
-import WorkoutDetailsViewContainer from './workout/workoutDetails/WorkoutDetailsViewContainer';
 import ScheduleViewContainer from './schedule/ScheduleViewContainer';
-import ProfileViewContainer from './profile/ProfileViewContainer';
 
-export const HOME_INDEX = 0;
 export const WORKOUT_INDEX = 1;
-export const SCHEDULE_INDEX = 2;
-export const PROFILE_INDEX = 3;
 
 export function isInView(state, index) {
   return state.getIn(['navigationState', 'index']) === index;
@@ -28,13 +22,13 @@ export default function AppRouter(props) {
 
   if (key.indexOf('Athletics') === 0) {
     return (
-      <WorkoutViewContainer />
+      <ScheduleViewContainer index={index} />
     );
   }
 
   if (key.indexOf('DetailsForWorkout') === 0) {
     return (
-        <WorkoutDetailsViewContainer />
+      <ScheduleViewContainer index={index} />
     );
   }
 
