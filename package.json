@@ -1,5 +1,5 @@
 {
-  "name": "SPAC Fusion",
+  "name": "SPAC",
   "author": "Andrew Zurn",
   "description": "React Native App Starter Kit for Android and iOS",
   "license": "MIT",
@@ -37,6 +37,7 @@
     "react-dom": "~15.2.0",
     "react-native": "^0.34.1",
     "react-native-busy-indicator": "^1.0.8",
+    "react-native-communications": "^2.2.1",
     "react-native-lock": "futurice/react-native-lock#feature/customizedTheme",
     "react-native-material-design": "^0.3.7",
     "react-native-message-bar": "^1.6.0",

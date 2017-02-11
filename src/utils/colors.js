@@ -10,6 +10,6 @@ module.exports = {
   spacMediumGray: '#333333',
   spacLightGray: '#4d4d4d',
   textStyle: Platform.OS === 'ios' ? 'Avenir-Medium' : 'sans-serif',
-  textSize: 17,
-  titleSize: 19
+  textSize: 19,
+  titleSize: 21
 };

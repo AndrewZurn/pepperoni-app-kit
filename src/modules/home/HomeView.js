@@ -1,16 +1,11 @@
-import React, {PropTypes} from 'react';
-import {
-    Dimensions,
-    Image,
-    StyleSheet,
-    ScrollView,
-    Text,
-    View
-} from 'react-native';
-import {Card} from 'react-native-material-design';
-import Colors from '../../utils/colors';
+import React, {PropTypes} from "react";
+import {Dimensions, Image, StyleSheet, ScrollView, Text, View} from "react-native";
+import {Card, Button} from "react-native-material-design";
+import Colors from "../../utils/colors";
+import Communications from 'react-native-communications';
 
 var height = Dimensions.get('window').height;
+var width = Dimensions.get('window').width;
 
 const HomeView = React.createClass({
   propTypes: {
@@ -19,34 +14,66 @@ const HomeView = React.createClass({
 
   render() {
     return (
-        <View style={styles.container}>
-          <Card style={styles.card}>
-            <Card.Body>
-              <Text style={styles.title}>
-                Fusion by SPAC
-              </Text>
-              <Text style={[styles.text, {textAlign: 'center'}]}>
-                Weekly Schedule:
-              </Text>
-              <Text style={styles.text}>
-                <Text style={[styles.text, {color: Colors.spacGold}]}>Monday – Friday:</Text> 6:00 am, noon, 5:30 pm{'\n'}
-                <Text style={[styles.text, {color: Colors.spacGold}]}>Saturday:</Text> 8 am and 9 am
-              </Text>
-              <Text style={[styles.text, {textAlign: 'center', paddingTop: 6}]}>
-                Definitions:
-              </Text>
-              <Text style={styles.text}>
-                <Text style={[styles.text, {color: Colors.spacGold}]}>AMRAP</Text> - As many rounds/reps As possible{'\n'}
-                <Text style={[styles.text, {color: Colors.spacGold}]}>TASK</Text> - Finish task at hand as fast as possible{'\n'}
-                <Text style={[styles.text, {color: Colors.spacGold}]}>HEAVY</Text> - Lift and form focused with heavy weight and additional exercise{'\n'}
-                <Text style={[styles.text, {color: Colors.spacGold}]}>CARDIO</Text> - Cardio focused with bursts of exercises{'\n'}
-                <Text style={[styles.text, {color: Colors.spacGold}]}>30:30</Text> - 30 seconds of work, 30 seconds of rest{'\n'}
-                <Text style={[styles.text, {color: Colors.spacGold}]}>20:10</Text> - 20 seconds of work, 10 seconds of rest{'\n'}
-              </Text>
-            </Card.Body>
-          </Card>
-        </View>
+      <View style={styles.container}>
+        <Card style={styles.card}>
+          <Card.Body>
+            <Text style={styles.title}>
+              Welcome
+            </Text>
+            <Text style={[styles.text]}>
+              The <Text style={{color: Colors.spacGold}}>Saint Paul Athletic Club</Text> is the premier fitness and
+              social club in the hear of historic downtown Saint Paul. The Club has a lot to offer,
+              from state of the art amenities, high energy fitness classes, exquisite social events,
+              and our wonderful hospitality.
+            </Text>
+            <Text style={[styles.text, {color: Colors.spacGold, textAlign: 'center', paddingTop: 8}]}>
+              Club Hours:
+            </Text>
+            <Text style={[styles.text]}>
+              <Text style={[styles.text, {color: Colors.spacGold}]}>Weekdays</Text> - 5am to 10pm{'\n'}
+              <Text style={[styles.text, {color: Colors.spacGold}]}>Weekends</Text> - 7am to 8pm
+            </Text>
+            <Text style={[styles.text, {color: Colors.spacGold, textAlign: 'center'}]}>
+              Address:
+            </Text>
+            <Text style={[styles.text]}>
+              340 Cedar Street{'\n'}
+              St. Paul, MN 55101
+            </Text>
+            <View style={styles.buttonView}>
+              <Button
+                text='Call'
+                raised={true}
+                overrides={{
+                  textColor: Colors.spacGold,
+                  backgroundColor: Colors.spacMediumGray,
+                  rippleColor: Colors.spacGold,
+                }}
+                onPress={this._callSpac}
+              />
+              <Button
+                text='Visit Website'
+                raised={true}
+                overrides={{
+                  textColor: Colors.spacGold,
+                  backgroundColor: Colors.spacMediumGray,
+                  rippleColor: Colors.spacGold,
+                }}
+                onPress={this._openSpacWebsite}
+              />
+            </View>
+          </Card.Body>
+        </Card>
+      </View>
     );
+  },
+
+  _callSpac() {
+    Communications.phonecall("6512917722", true)
+  },
+
+  _openSpacWebsite() {
+    Communications.web("http://www.thespac.com/home")
   }
 });
 
@@ -73,6 +100,12 @@ const styles = StyleSheet.create({
     fontSize: Colors.textSize - 1,
     color: Colors.spacCream,
     fontFamily: Colors.textStyle
+  },
+  buttonView: {
+    marginTop: 4,
+    flexDirection: 'column',
+    justifyContent: 'flex-end',
+    alignItems: 'stretch',
   }
 });
 

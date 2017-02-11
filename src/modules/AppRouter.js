@@ -26,7 +26,7 @@ export default function AppRouter(props) {
     return <HomeViewContainer />;
   }
 
-  if (key.indexOf('Workout') === 0) {
+  if (key.indexOf('Athletics') === 0) {
     return (
       <WorkoutViewContainer />
     );
@@ -38,17 +38,10 @@ export default function AppRouter(props) {
     );
   }
 
-  if (key.indexOf('Schedule') === 0) {
+  if (key.indexOf('Events') === 0) {
     const index = props.scenes.indexOf(props.scene);
     return (
         <ScheduleViewContainer index={index} />
-    );
-  }
-
-  if (key.indexOf('Profile') === 0) {
-    const index = props.scenes.indexOf(props.scene);
-    return (
-        <ProfileViewContainer index={index} />
     );
   }
 

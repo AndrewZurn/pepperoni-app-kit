@@ -6,14 +6,14 @@ import {
   StyleSheet,
   StatusBar
 } from 'react-native';
+import AppRouter from '../AppRouter';
+import TabBar from '../../components/TabBar';
+import Colors from '../../utils/colors';
 const {
   CardStack: NavigationCardStack,
   Header: NavigationHeader,
   PropTypes: NavigationPropTypes
 } = NavigationExperimental;
-import AppRouter from '../AppRouter';
-import TabBar from '../../components/TabBar';
-import Colors from '../../utils/colors';
 
 // Height duplicated from React Native NavigationHeader component
 const APP_BAR_HEIGHT = Platform.OS === 'ios' ? 64 : 56;
@@ -27,7 +27,8 @@ const NavigationView = React.createClass({
     navigationState: PropTypes.shape({
       tabs: NavigationPropTypes.navigationState.isRequired,
       HomeTab: NavigationPropTypes.navigationState.isRequired,
-      ProfileTab: NavigationPropTypes.navigationState.isRequired
+      AthleticsTab: NavigationPropTypes.navigationState.isRequired,
+      EventsTab: NavigationPropTypes.navigationState.isRequired
     }),
     switchTab: PropTypes.func.isRequired,
     pushRoute: PropTypes.func.isRequired

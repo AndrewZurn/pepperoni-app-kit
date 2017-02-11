@@ -34,30 +34,24 @@ const initialState = fromJS({
     index: 0,
     routes: [
       {key: 'HomeTab', title: 'Home'},
-      {key: 'WorkoutTab', title: 'Workout'},
-      {key: 'ScheduleTab', title: 'Schedule'},
-      {key: 'ProfileTab', title: 'Profile'}
+      {key: 'AthleticsTab', title: 'Athletics'},
+      {key: 'EventsTab', title: 'Events'}
     ]
   },
   // Scenes for the `HomeTab` tab.
   HomeTab: {
     index: 0,
-    routes: [{key: 'Home', title: 'Fusion'}]
+    routes: [{key: 'Home', title: 'Saint Paul Athletic Club'}]
   },
-  // Scenes for the `WorkoutTab` tab.
-  WorkoutTab: {
+  // Scenes for the `AthleticsTab` tab.
+  AthleticsTab: {
     index: 0,
-    routes: [{key: 'Workout', title: 'Today\'s Workout'}]
+    routes: [{key: 'Athletics', title: 'Athletics'}]
   },
-  // Scenes for the `ScheduleTab` tab.
-  ScheduleTab: {
+  // Scenes for the `EventsTab` tab.
+  EventsTab: {
     index: 0,
-    routes: [{key: 'Schedule', title: 'Weekly Schedule'}]
-  },
-  // Scenes for the `ProfileTab` tab.
-  ProfileTab: {
-    index: 0,
-    routes: [{key: 'Profile', title: 'Profile'}]
+    routes: [{key: 'Events', title: 'Events'}]
   }
 });
 
