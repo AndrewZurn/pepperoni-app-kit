@@ -33,7 +33,6 @@ export default function AppRouter(props) {
   }
 
   if (key.indexOf('Events') === 0) {
-    const index = props.scenes.indexOf(props.scene);
     return (
         <ScheduleViewContainer scheduleType='events' />
     );

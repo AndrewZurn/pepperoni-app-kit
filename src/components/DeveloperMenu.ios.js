@@ -15,30 +15,6 @@ import {
 const DeveloperMenu = React.createClass({
   displayName: 'DeveloperMenu',
 
-  showDeveloperMenu() {
-    const options = {
-      clearState: 0,
-      showLogin: 1,
-      cancel: 2
-    };
-
-    const callback = async index => {
-      if (index === options.clearState) {
-        await snapshot.clearSnapshot();
-        console.warn('(╯°□°）╯︵ ┻━┻ \nState cleared, Cmd+R to reload the application now');
-      }
-    };
-
-    ActionSheetIOS.showActionSheetWithOptions({
-      options: [
-        'Clear state',
-        'Show login',
-        'Cancel'
-      ],
-      cancelButtonIndex: options.cancel
-    }, callback);
-  },
-
   render() {
     if (!__DEV__) {
       return null;
@@ -47,7 +23,6 @@ const DeveloperMenu = React.createClass({
     return (
       <TouchableOpacity
         style={styles.circle}
-        onPress={this.showDeveloperMenu}
         />
     );
   }

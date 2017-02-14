@@ -75,7 +75,7 @@ export default function ScheduleStateReducer(state = initialState, action = {}) 
 
     // REQUESTS
     case GET_GROUP_WORKOUTS_REQUEST:
-      if (state.get('groupWorkouts') === null) {
+      if (!state.get('groupWorkouts')) {
         return loop(
             state.set('loading', true),
             Effects.promise(requestGetGroupWorkouts)
@@ -83,7 +83,7 @@ export default function ScheduleStateReducer(state = initialState, action = {}) 
       }
 
     case GET_SMALL_GROUP_WORKOUTS_REQUEST:
-      if (state.get('smallGroupWorkouts') === null) {
+      if (!state.get('smallGroupWorkouts')) {
         return loop(
           state.set('loading', true),
           Effects.promise(requestGetSmallGroupWorkouts)
@@ -91,7 +91,7 @@ export default function ScheduleStateReducer(state = initialState, action = {}) 
       }
 
     case GET_PILATES_WORKOUTS_REQUEST:
-      if (state.get('pilatesWorkouts') === null) {
+      if (!state.get('pilatesWorkouts')) {
         return loop(
           state.set('loading', true),
           Effects.promise(requestGetPilatesWorkouts)
@@ -99,7 +99,7 @@ export default function ScheduleStateReducer(state = initialState, action = {}) 
       }
 
     case GET_EVENTS_REQUEST:
-      if (state.get('events') === null) {
+      if (!state.get('events')) {
         return loop(
           state.set('loading', true),
           Effects.promise(requestGetEvents)

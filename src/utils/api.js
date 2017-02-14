@@ -101,7 +101,7 @@ export function url(path) {
 async function sendRequest(method, path, body) {
   console.log(`Requesting ${method} - ${path}`);
   const endpoint = url(path);
-  const headers = getRequestHeaders(body, token);
+  const headers = getRequestHeaders(body);
   const options = body
       ? {method, headers, body: JSON.stringify(body)}
       : {method, headers};
@@ -148,17 +148,13 @@ async function handleResponse(path, response, method) {
   return result;
 }
 
-function getRequestHeaders(body, token) {
+function getRequestHeaders(body) {
   const headers = body
       ? {'Accept': 'application/json',
          'Content-Type': 'application/json',
          'Origin': 'https://fusion-mobile.spac.com/',
          'X-Requested-With': 'fusion-mobile'
         } : {'Accept': 'application/json'};
-
-  if (token) {
-    return {...headers, Authorization: token};
-  }
 
   return headers;
 }
