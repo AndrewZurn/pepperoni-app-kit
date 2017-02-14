@@ -1,7 +1,7 @@
 import {Map} from 'immutable';
 import {loop, Effects} from 'redux-loop';
 import * as WorkoutService from '../../services/workoutService';
-import * as UserService from '../../services/userService';
+// import * as UserService from '../../services/userService';
 
 // Initial state
 const initialState = Map({

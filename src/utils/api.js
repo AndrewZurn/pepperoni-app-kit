@@ -1,7 +1,6 @@
 import Promise from 'bluebird';
 import HttpError from 'standard-http-error';
 import {getConfiguration} from '../utils/configuration';
-import {getAuthenticationToken} from '../utils/authentication';
 import EventEmitter from 'event-emitter';
 
 const TIMEOUT = 6000;
@@ -102,7 +101,6 @@ export function url(path) {
 async function sendRequest(method, path, body) {
   console.log(`Requesting ${method} - ${path}`);
   const endpoint = url(path);
-  const token = await getAuthenticationToken();
   const headers = getRequestHeaders(body, token);
   const options = body
       ? {method, headers, body: JSON.stringify(body)}

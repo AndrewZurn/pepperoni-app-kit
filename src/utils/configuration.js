@@ -1,28 +1,14 @@
 import {Map} from 'immutable';
 import * as env from '../../env';
 
-let baseConfig = {
-  USERS_PATH: '/users',
-  WORKOUTS_PATH: '/workouts',
-  SCHEDULED_WORKOUTS_PATH: '/scheduled-workouts'
-};
-
 let localConfig = Map({
-  ...baseConfig,
   API_FAILED_REQUEST_WARNING_MESSAGE: false,
-  API_ROOT: 'http://localhost:8080'
-});
-
-let devConfig = Map({
-  ...baseConfig,
-  API_FAILED_REQUEST_WARNING_MESSAGE: false,
-  API_ROOT: 'http://spac-fusion-api.us-west-2.elasticbeanstalk.com'
+  API_ROOT: 'https://spac-mobile-editor.herokuapp.com'
 });
 
 let prodConfig = Map({
-  ...baseConfig,
   API_FAILED_REQUEST_WARNING_MESSAGE: true,
-  API_ROOT: 'http://spac-fusion-api.us-west-2.elasticbeanstalk.com'
+  API_ROOT: 'https://spac-mobile-editor.herokuapp.com'
 });
 
 let configuration = getConfig();

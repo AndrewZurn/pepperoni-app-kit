@@ -22,20 +22,20 @@ export default function AppRouter(props) {
 
   if (key.indexOf('Athletics') === 0) {
     return (
-      <ScheduleViewContainer index={index} />
+      <ScheduleViewContainer scheduleType='group' />
     );
   }
 
   if (key.indexOf('DetailsForWorkout') === 0) {
     return (
-      <ScheduleViewContainer index={index} />
+      <ScheduleViewContainer scheduleType='group' />
     );
   }
 
   if (key.indexOf('Events') === 0) {
     const index = props.scenes.indexOf(props.scene);
     return (
-        <ScheduleViewContainer index={index} />
+        <ScheduleViewContainer scheduleType='events' />
     );
   }
 
