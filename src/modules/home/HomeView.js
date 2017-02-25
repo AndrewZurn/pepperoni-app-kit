@@ -30,8 +30,8 @@ const HomeView = React.createClass({
               Club Hours:
             </Text>
             <Text style={[styles.text]}>
-              <Text style={[styles.text, {color: Colors.spacGold}]}>Weekdays</Text> - 5am to 10pm{'\n'}
-              <Text style={[styles.text, {color: Colors.spacGold}]}>Weekends</Text> - 7am to 8pm
+              <Text style={[styles.text, {color: Colors.spacTan}]}>Weekdays</Text> - 5am to 10pm{'\n'}
+              <Text style={[styles.text, {color: Colors.spacTan}]}>Weekends</Text> - 7am to 8pm
             </Text>
             <Text style={[styles.text, {color: Colors.spacGold, textAlign: 'center'}]}>
               Address:

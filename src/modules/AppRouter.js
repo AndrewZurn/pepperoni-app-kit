@@ -3,6 +3,7 @@
 import React from 'react';
 import HomeViewContainer from './home/HomeViewContainer';
 import ScheduleViewContainer from './schedule/ScheduleViewContainer';
+import AthleticsViewContainer from './athletics/AthleticsViewContainer';
 
 export const WORKOUT_INDEX = 1;
 
@@ -22,13 +23,25 @@ export default function AppRouter(props) {
 
   if (key.indexOf('Athletics') === 0) {
     return (
+      <AthleticsViewContainer scheduleType='group' />
+    );
+  }
+
+  if (key.indexOf('GroupSchedule') === 0) {
+    return (
       <ScheduleViewContainer scheduleType='group' />
     );
   }
 
-  if (key.indexOf('DetailsForWorkout') === 0) {
+  if (key.indexOf('SmallGroupSchedule') === 0) {
     return (
-      <ScheduleViewContainer scheduleType='group' />
+      <ScheduleViewContainer scheduleType='small_group' />
+    );
+  }
+
+  if (key.indexOf('PilatesSchedule') === 0) {
+    return (
+      <ScheduleViewContainer scheduleType='pilates' />
     );
   }
 

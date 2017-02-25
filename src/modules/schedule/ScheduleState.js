@@ -42,7 +42,7 @@ export function getSmallGroupWorkouts() {
 
 export async function requestGetSmallGroupWorkouts() {
   return {
-    type: GET_GROUP_WORKOUTS_RESPONSE,
+    type: GET_SMALL_GROUP_WORKOUTS_RESPONSE,
     payload: await ScheduleService.getSmallGroupWorkouts()
   };
 }
@@ -53,7 +53,7 @@ export function getPilatesWorkouts() {
 
 export async function requestGetPilatesWorkouts() {
   return {
-    type: GET_GROUP_WORKOUTS_RESPONSE,
+    type: GET_PILATES_WORKOUTS_RESPONSE,
     payload: await ScheduleService.getPilatesWorkouts()
   };
 }

@@ -1,14 +1,8 @@
-import React, {PropTypes} from 'react';
-import {
-  Dimensions,
-  ScrollView,
-  View,
-  StyleSheet,
-  Text
-} from 'react-native';
-import {Card} from 'react-native-material-design';
-import * as ScheduleState from './ScheduleState';
-import Colors from '../../utils/colors';
+import React, {PropTypes} from "react";
+import {Dimensions, ScrollView, View, StyleSheet, Text} from "react-native";
+import {Card} from "react-native-material-design";
+import * as ScheduleState from "./ScheduleState";
+import Colors from "../../utils/colors";
 
 var width = Dimensions.get('window').width;
 
@@ -39,7 +33,7 @@ const ScheduleView = React.createClass({
   },
 
   _getSchedule() {
-    switch(this.props.scheduleType) {
+    switch (this.props.scheduleType) {
       case 'group':
         this._getGroupWorkouts();
         break;
@@ -57,27 +51,74 @@ const ScheduleView = React.createClass({
     }
   },
 
+  _getScheduleItems(index, item) {
+    return <View key={'item_view_key' + index} style={[styles.cardContainer]}>
+      <Text key={'item_day_text' + index} style={styles.dayOfWeekTitle}>{item.day}</Text>
+      {item.classes.map((classItem, classIndex) =>
+        <Card key={'item_card_key' + index + ':' + classIndex} style={styles.card}>
+          <Card.Body key={'item_card_body_key' + index + ':' + classIndex}>
+            <Text key={'item_name_key' + index + ':' + classIndex} style={styles.text}>
+              <Text style={styles.textTitle}>Time:</Text> {classItem.time}
+            </Text>
+            <Text key={'item_class_key' + index + ':' + classIndex} style={styles.text}>
+              <Text style={styles.textTitle}>Class:</Text> {classItem.name}
+            </Text>
+            <Text key={'item_instructor_key' + index + ':' + classIndex} style={styles.text}>
+              <Text style={styles.textTitle}>Instructor:</Text> {classItem.instructor}
+            </Text>
+            <Text key={'item_location_key' + index + ':' + classIndex} style={styles.text}>
+              <Text style={styles.textTitle}>Location:</Text> {classItem.room}
+            </Text>
+          </Card.Body>
+        </Card>
+      )}
+    </View>;
+  },
+
   _getScheduleCardsData() {
-    switch(this.props.scheduleType) {
+    switch (this.props.scheduleType) {
       case 'group':
-        return this.props.groupWorkouts;
-        break;
+        if (this.props.groupWorkouts && this.props.groupWorkouts.classSchedule) {
+          return this.props.groupWorkouts.classSchedule.map((item, index) =>
+            this._getScheduleItems(index, item)
+          );
+        } else {
+          return [];
+        }
       case 'small_group':
-        return this.props.smallGroupWorkouts;
-        break;
+        if (this.props.smallGroupWorkouts && this.props.smallGroupWorkouts.classSchedule) {
+          return this.props.smallGroupWorkouts.classSchedule.map((item, index) =>
+            this._getScheduleItems(index, item)
+          );
+        } else {
+          return [];
+        }
       case 'pilates':
-        return this.props.pilatesWorkouts;
-        break;
+        if (this.props.pilatesWorkouts && this.props.pilatesWorkouts.classSchedule) {
+          return this.props.pilatesWorkouts.classSchedule.map((item, index) =>
+            this._getScheduleItems(index, item)
+          );
+        } else {
+          return [];
+        }
       case 'events':
         if (this.props.events && this.props.events.eventSchedule) {
           return this.props.events.eventSchedule.map((item, index) =>
             <View key={'item_view_key' + index} style={styles.cardContainer}>
               <Card key={'item_card_key' + index} style={styles.card}>
                 <Card.Body key={'item_card_body_key' + index}>
-                  <Text key={'item_title_key' + index} style={styles.workoutTitle}>{item.name}</Text>
-                  <Text key={'item_date_key' + index} style={styles.text}>{item.date}</Text>
-                  <Text key={'item_location_key' + index} style={styles.text}>{item.location}</Text>
-                  <Text key={'item_description_key' + index} style={styles.text}>{item.description}</Text>
+                  <Text key={'item_title_key' + index} style={styles.workoutTitle}>
+                    {item.name}
+                  </Text>
+                  <Text key={'item_date_key' + index} style={styles.text}>
+                    <Text style={styles.textTitle}>Date:</Text> {item.date}
+                  </Text>
+                  <Text key={'item_location_key' + index} style={styles.text}>
+                    <Text style={styles.textTitle}>Location:</Text> {item.location}
+                  </Text>
+                  <Text key={'item_description_key' + index} style={styles.text}>
+                    <Text style={styles.textTitle}>Description:</Text> {item.description}
+                  </Text>
                 </Card.Body>
               </Card>
             </View>
@@ -92,13 +133,12 @@ const ScheduleView = React.createClass({
   },
 
   render() {
-    let items = this._getScheduleCardsData()
+    let items = this._getScheduleCardsData();
 
     return (
       <View style={styles.container} onLayout={this._getSchedule}>
         <ScrollView ref='scrollView'
-                    keyboardDismissMode='interactive'
-                    style={styles.scrollView}>
+                    keyboardDismissMode='interactive'>
           {items}
         </ScrollView>
       </View>
@@ -112,12 +152,7 @@ const styles = StyleSheet.create({
     paddingTop: 70,
     backgroundColor: Colors.spacMediumGray
   },
-  scrollView: {
-    flex: 1
-  },
   cardContainer: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: Colors.spacMediumGray
   },
@@ -133,6 +168,18 @@ const styles = StyleSheet.create({
     color: Colors.spacGold,
     paddingBottom: 5,
     fontFamily: Colors.textStyle
+  },
+  dayOfWeekTitle: {
+    textAlign: 'center',
+    justifyContent: 'center',
+    fontSize: Colors.titleSize + 1,
+    fontWeight: 'bold',
+    color: Colors.spacGold,
+    paddingBottom: 5,
+    fontFamily: Colors.textStyle
+  },
+  textTitle: {
+    color: Colors.spacTan,
   },
   text: {
     fontSize: Colors.textSize - 3,
